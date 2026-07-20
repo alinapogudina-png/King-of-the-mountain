@@ -576,7 +576,27 @@
     #task-check-btn { font-family: var(--font-family); font-weight: bold; width: 100%; max-width: 350px; padding: 12px 20px; font-size: calc(var(--font-size) * 0.8); border: none; border-radius: 8px; background-color: #8ECA3C; color: #1a1a2e; cursor: pointer; transition: transform 0.2s, background-color 0.2s; }
     #task-check-btn:hover { background-color: #76aa30; transform: scale(1.05); }
     
-    #user-sequence-display { min-height: 50px; width: 100%; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px dashed var(--border-color); padding: 10px; text-align: center; font-size: ${conf.aFontSize}px; word-spacing: 5px; }
+    #user-sequence-display { min-height: 50px; width: 100%; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px dashed var(--border-color); padding: 10px; text-align: center; font-size: ${conf.aFontSize}px; }
+    
+    /* КЛАСС ДЛЯ ОТМЕНЯЕМЫХ СЛОВ-ТЕГОВ */
+    .seq-word {
+        display: inline-block;
+        padding: 6px 14px;
+        margin: 4px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        font-family: var(--font-family);
+        font-size: calc(${conf.aFontSize}px * 0.8);
+        transition: all 0.2s ease;
+    }
+    .seq-word:hover {
+        background: rgba(231, 76, 60, 0.4) !important;
+        border-color: #e74c3c !important;
+        transform: scale(1.05);
+    }
     
     .win-text-frame { position: absolute; z-index: 100; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 700px; background: rgba(20, 20, 30, 0.85); backdrop-filter: blur(3px); color: #fff; padding: 40px; border-radius: 20px; border: 2px solid #8ECA3C; box-shadow: 0 0 30px rgba(142, 202, 60, 0.5); text-align: center; }
     .win-text-frame p { font-family: 'Russo One', sans-serif; font-size: clamp(1.2rem, 3vw, 2rem); margin: 0 0 30px; text-transform: uppercase; color: #8ECA3C; }
@@ -714,8 +734,8 @@
             spawn(this.spawnProjectile, conf.projectileFrequency * 1000);
             spawn(this.spawnTask, conf.taskFrequency * 1000);
             
-            // Жизни и Броня теперь спавнятся в 2 раза реже (каждые 16 секунд)
-            spawn(this.spawnGroundBonus, 16000); 
+            // ЗОЛОТАЯ СЕРИДИНА: Жизни и Броня теперь спавнятся каждые 12 секунд
+            spawn(this.spawnGroundBonus, 12000); 
         },
         
         stopSpawners() { 
@@ -964,25 +984,54 @@
             if(task.sentence) {
                 dom.qEl.textContent = 'Расставьте слова в правильном порядке';
                 dom.userSeqDisplay.classList.remove('hidden');
-                dom.userSeqDisplay.textContent = '';
-                const c = task.sentence.split(' '), s = [...c].sort(() => 0.5 - Math.random());
-                let u = [];
-                const w = s.map(word => {
+                dom.userSeqDisplay.innerHTML = '';
+                
+                const c = task.sentence.split(' ').filter(Boolean);
+                const s = [...c].sort(() => 0.5 - Math.random());
+                let u = []; // Массив объектов { word: string, btn: HTMLButtonElement }
+                
+                // Функция отрисовки выбранной цепочки слов
+                const renderChain = () => {
+                    dom.userSeqDisplay.innerHTML = '';
+                    u.forEach((item, index) => {
+                        const tag = document.createElement('button');
+                        tag.className = 'seq-word';
+                        tag.innerHTML = item.word;
+                        
+                        // Клик по слову в поле сборки возвращает его обратно
+                        tag.onclick = () => {
+                            item.btn.disabled = false;
+                            item.btn.style.opacity = '1';
+                            u.splice(index, 1);
+                            renderChain();
+                        };
+                        dom.userSeqDisplay.appendChild(tag);
+                    });
+                };
+                
+                const buttons = s.map(word => {
                     const b = document.createElement('button');
                     b.innerHTML = word;
                     b.onclick = () => {
-                        u.push(word);
+                        u.push({ word: word, btn: b });
                         b.disabled = true;
-                        dom.userSeqDisplay.textContent = u.join(' ');
+                        b.style.opacity = '0.3';
+                        renderChain();
+                        
+                        // Проверяем правильность только когда собраны абсолютно ВСЕ слова
                         if(u.length === c.length) {
-                            if(u.join(' ') === task.sentence) {
+                            const resultPhrase = u.map(item => item.word).join(' ');
+                            if(resultPhrase === task.sentence) {
                                 setTimeout(() => this.taskSuccess(), 300);
                             } else {
                                 this.handleIncorrectAnswer();
                                 setTimeout(() => {
                                     u = [];
-                                    dom.userSeqDisplay.textContent = '';
-                                    w.forEach(b => b.disabled = false);
+                                    dom.userSeqDisplay.innerHTML = '';
+                                    buttons.forEach(btn => {
+                                        btn.disabled = false;
+                                        btn.style.opacity = '1';
+                                    });
                                 }, 1000);
                             }
                         }
