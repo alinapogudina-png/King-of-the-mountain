@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Царь горы Builder - ELT Workshop</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        
+        body { font-family: 'Poppins', sans-serif; background-color: #8ECA3C; color: #e0e0ff; display: flex; padding: 20px; gap: 20px; height: 100vh; margin: 0; box-sizing: border-box; overflow: hidden; }
+        
+        .editor-panel, .preview-panel { background-color: rgba(25, 25, 45, 0.95); backdrop-filter: blur(10px); padding: 25px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); z-index: 1; }
+        .editor-panel { width: 45%; display: flex; flex-direction: column; overflow-y: auto; }
+        .preview-panel { width: 55%; display: flex; flex-direction: column; position: relative; }
+        
+        .editor-panel::-webkit-scrollbar { width: 8px; }
+        .editor-panel::-webkit-scrollbar-thumb { background: #8ECA3C; border-radius: 4px; }
+        
+        h1 { color: #8ECA3C; font-weight: 800; font-size: 28px; margin: 0 0 5px 0; text-align: center; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 2px 10px rgba(142, 202, 60, 0.4);}
+        .subtitle { text-align: center; color: #a0a0c0; font-size: 12px; margin-bottom: 20px; letter-spacing: 0.5px;}
+        h3 { color: #fff; font-size: 15px; margin-bottom: 12px; border-bottom: 1px solid #4b4b6a; padding-bottom: 5px; margin-top: 25px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .form-group { margin-bottom: 15px; }
+        .styled-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 12px; color: #b5b5c3; text-transform: uppercase;}
+        .help-text { font-size: 11px; color: #4ae38c; margin-top: -4px; margin-bottom: 10px; display: block; text-transform: none; line-height: 1.4;}
+        input[type="text"], input[type="url"], input[type="number"], select, textarea { width: 100%; padding: 10px 15px; border-radius: 10px; border: 1px solid #4b4b6a; background-color: #1a1a2e; color: #fff; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 13px; transition: 0.3s; }
+        input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus, input[type="number"]:focus { border-color: #8ECA3C; outline: none; box-shadow: 0 0 10px rgba(142, 202, 60, 0.2); }
+        input[type="color"] { padding: 0; border: none; width: 100%; height: 36px; border-radius: 8px; cursor: pointer; background: transparent; }
+        input[type="file"] { margin-top: 8px; color: #a0a0c0; font-size: 12px; }
+        input[type="file"]::file-selector-button { font-family: 'Poppins', sans-serif; font-weight: 600; background-color: #4b4b6a; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        input[type="file"]::file-selector-button:hover { background-color: #8ECA3C; color: #1a1a2e; }
+        input[type="range"] { width: 100%; accent-color: #8ECA3C; cursor: pointer; margin-top: 10px;}
+        textarea { resize: vertical; min-height: 100px; white-space: pre; }
+        
+        .flex-row { display: flex; gap: 15px; align-items: flex-end; margin-bottom: 10px; flex-wrap: wrap; }
+        .flex-col { flex: 1; min-width: 120px; }
+        
+        .val-display { display: inline-block; background: #4b4b6a; padding: 2px 8px; border-radius: 5px; font-size: 11px; margin-left: 10px; color: #fff;}
+
+        #previewFrame { width: 100%; flex: 1; border: 2px dashed #8ECA3C; border-radius: 15px; background-color: #000;}
+        
+        button.gen-btn { background: linear-gradient(135deg, #6b9e28, #8ECA3C); color: #1a1a2e; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 800; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(142, 202, 60, 0.4); margin-top: 20px;}
+        button.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(142, 202, 60, 0.6); }
+        
+        #generated-code { height: 60px; margin-top: 10px; background: #1a1a2e; border-color: #4b4b6a; color: #4ae38c; font-family: monospace; font-size: 11px;}
+    </style>
+</head>
+<body>
+
+    <div class="editor-panel">
+        <h1 id="editor-title">Царь горы</h1>
+        <div class="subtitle">Alina Pogudina 2026 @ELT_workshop</div>
+        
+        <h3>Начальный экран и Кнопка</h3>
+        <div class="flex-row">
+            <div class="form-group flex-col" style="flex:2">
+                <label>Заголовок игры</label>
+                <input type="text" id="gameTitle" value="Царь горы: Битва знаний" oninput="document.getElementById('editor-title').innerText = this.value || 'Царь горы';">
+            </div>
+            <div class="form-group flex-col">
+                <label>Цвет заголовка</label>
+                <input type="color" id="titleColor" value="#ffffff">
+            </div>
+            <div class="form-group flex-col">
+                <label>Язык UI</label>
+                <select id="uiLang">
+                    <option value="RU">Русский</option>
+                    <option value="EN">English</option>
+                    <option value="ES">Español</option>
+                    <option value="FR">Français</option>
+                    <option value="DE">Deutsch</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex-row">
+            <div class="form-group flex-col" style="flex:1.5">
+                <label>Текст кнопки СТАРТ</label>
+                <input type="text" id="startButtonText" value="ИГРАТЬ">
+            </div>
+             <div class="form-group flex-col" style="flex:0.75">
+                <label>Цвет кнопки</label>
+                <input type="color" id="startButtonColor" value="#8ECA3C">
+            </div>
+             <div class="form-group flex-col" style="flex:0.75">
+                <label>Цвет текста</label>
+                <input type="color" id="startButtonTextColor" value="#1a1a2e">
+            </div>
+        </div>
+
+        <h3>Параметры баланса</h3>
+        <div class="form-group">
+            <label>Начальные жизни</label>
+            <input type="number" id="initialLives" value="3" min="1" max="10">
+        </div>
+
+        <div class="styled-box">
+             <label>Скорость снарядов <span id="projSpeedVal" class="val-display">1.0x</span></label>
+             <input type="range" id="projectileSpeed" min="0.5" max="3" step="0.1" value="1.0" oninput="updateVal('projectileSpeed', 'projSpeedVal', 'x')">
+        </div>
+        <div class="styled-box">
+             <label>Частота снарядов <span id="projFreqVal" class="val-display">1.5 сек</span></label>
+             <input type="range" id="projectileFrequency" min="0.5" max="4" step="0.1" value="1.5" oninput="updateVal('projectileFrequency', 'projFreqVal', ' сек')">
+        </div>
+        <div class="styled-box">
+             <label>Размер снарядов <span id="projSizeVal" class="val-display">40px</span></label>
+             <input type="range" id="projectileSize" min="20" max="100" value="40" oninput="updateVal('projectileSize', 'projSizeVal', 'px')">
+        </div>
+        <div class="styled-box">
+             <label>Частота появления заданий <span id="taskFreqVal" class="val-display">5 сек</span></label>
+             <input type="range" id="taskFrequency" min="3" max="20" value="5" oninput="updateVal('taskFrequency', 'taskFreqVal', ' сек')">
+        </div>
+
+        <h3>Размеры и позиционирование</h3>
+        <div class="styled-box">
+             <label>Размер героя <span id="heroSizeVal" class="val-display">150px</span></label>
+             <input type="range" id="heroSize" min="50" max="250" value="150" oninput="updateVal('heroSize', 'heroSizeVal', 'px')">
+        </div>
+        <div class="styled-box">
+             <label>Позиция героя (Y) <span id="heroPosYVal" class="val-display">5%</span></label>
+             <input type="range" id="heroPosY" min="0" max="30" value="5" oninput="updateVal('heroPosY', 'heroPosYVal', '%')">
+        </div>
+        <div class="styled-box">
+             <label>Размер босса <span id="bossSizeVal" class="val-display">150px</span></label>
+             <input type="range" id="bossSize" min="50" max="250" value="150" oninput="updateVal('bossSize', 'bossSizeVal', 'px')">
+        </div>
+        <div class="styled-box">
+             <label>Позиция босса (X) <span id="bossPosXVal" class="val-display">50%</span></label>
+             <input type="range" id="bossPosX" min="10" max="90" value="50" oninput="updateVal('bossPosX', 'bossPosXVal', '%')">
+        </div>
+        <div class="styled-box">
+             <label>Позиция босса (Y) <span id="bossPosYVal" class="val-display">10%</span></label>
+             <input type="range" id="bossPosY" min="-10" max="30" value="10" oninput="updateVal('bossPosY', 'bossPosYVal', '%')">
+        </div>
+
+        <h3>Оформление окна заданий</h3>
+        <div class="flex-row">
+            <div class="form-group flex-col"><label>Фон вопроса</label><input type="color" id="colorQBox" value="#2c3e50"></div>
+            <div class="form-group flex-col"><label>Фон ответов</label><input type="color" id="colorABox" value="#1a1a2e"></div>
+            <div class="form-group flex-col"><label>Неоновая Рамка</label><input type="color" id="neonColor" value="#8ECA3C"></div>
+        </div>
+        
+        <div class="form-group">
+            <label>Шрифт текстов</label>
+            <select id="fontFamily">
+                <option value="'Montserrat', sans-serif">Montserrat</option>
+                <option value="'Russo One', sans-serif">Russo One</option>
+                <option value="'Comfortaa', sans-serif">Comfortaa</option>
+                <option value="'Jura', sans-serif">Jura</option>
+                <option value="'Caveat', cursive">Caveat</option>
+                <option value="'Neucha', cursive">Neucha</option>
+                <option value="'Oswald', sans-serif">Oswald</option>
+                <option value="'Lobster', cursive">Lobster</option>
+                <option value="'Pacifico', cursive">Pacifico</option>
+                <option value="'Bangers', cursive">Bangers</option>
+                <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                <option value="'Playfair Display', serif">Playfair Display</option>
+                <option value="'Amatic SC', cursive">Amatic SC</option>
+                <option value="'Rubik Bubbles', cursive">Rubik Bubbles</option>
+                <option value="'Alice', serif">Alice</option>
+                <option value="'Kurale', serif">Kurale</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Exo 2', sans-serif">Exo 2</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+            </select>
+        </div>
+
+        <div class="styled-box">
+             <div class="flex-row" style="align-items: flex-start; margin: 0;">
+                <div class="form-group flex-col" style="margin:0;"><label>Вопрос (Размер px)</label><input type="number" id="qFontSize" value="24"></div>
+                <div class="form-group flex-col" style="margin:0;"><label>Вопрос (Цвет)</label><input type="color" id="qColor" value="#ffffff"></div>
+                <div class="form-group flex-col" style="margin:0; border-left: 1px solid #4b4b6a; padding-left:15px;"><label>Ответы (Размер px)</label><input type="number" id="aFontSize" value="20"></div>
+                <div class="form-group flex-col" style="margin:0;"><label>Ответы (Цвет)</label><input type="color" id="aColor" value="#ffffff"></div>
+            </div>
+        </div>
+
+        <h3>Настройка заданий</h3>
+        <div class="form-group">
+            <label>Тип заданий</label>
+            <select id="gameMode" onchange="toggleTaskInputs()">
+                <option value="quiz">Квиз (Выбор ответа)</option>
+                <option value="fill">Вписать слово (Свободный ввод)</option>
+                <option value="order">Расставить слова (Конструктор фразы)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="check-btn-text-group" style="display:none;">
+            <label>Текст на кнопке проверки (любой язык!)</label>
+            <input type="text" id="checkButtonText" value="ПРОВЕРИТЬ">
+        </div>
+
+        <div class="form-group">
+            <span class="help-text">
+                <b>МАТЕМАТИКА (LaTeX):</b> Код автоматически распознает формулы, если обернуть их в знаки доллара. Например: <code>$x^2$</code> или <code>$$\frac{a}{b}$$</code>.
+            </span>
+        </div>
+
+        <div id="input-quiz">
+            <div class="flex-row" style="align-items: flex-start;">
+                <div class="form-group flex-col">
+                    <label>ВОПРОСЫ (Каждый на новой строке)</label>
+                    <textarea id="qList">Столица Франции?&#10;Какое животное самое быстрое?&#10;Какая планета третья от Солнца?</textarea>
+                </div>
+                <div class="form-group flex-col" style="flex: 1.5;">
+                    <label>ВАРИАНТЫ (Правильный | Неправильный...)</label>
+                    <textarea id="aList">Париж | Рим | Берлин&#10;Гепард | Лев | Сапсан&#10;Земля | Марс | Венера</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="input-fill" style="display:none;">
+            <div class="flex-row" style="align-items: flex-start;">
+                <div class="form-group flex-col">
+                    <label>Предложения с пропуском (_)</label>
+                    <textarea id="fillQList">Самая большая планета - ___.&#10;Вода кипит при температуре ___ градусов.</textarea>
+                </div>
+                <div class="form-group flex-col">
+                    <label>Правильные ответы</label>
+                    <textarea id="fillAList">Юпитер&#10;100</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="input-order" style="display:none;">
+            <div class="form-group">
+                <label>Фразы (Каждая на новой строке)</label>
+                <textarea id="orderList">Мама мыла раму&#10;В лесу родилась ёлочка</textarea>
+            </div>
+        </div>
+
+        <h3>Графика (Загрузка или ссылки)</h3>
+        <div class="styled-box">
+            <label>Фон игры</label>
+            <input type="text" id="imgBackground" value="https://i.postimg.cc/9096CnzR/e0185c15b34d67ff88cc7d9ff7ac5955-74146936-9128-4b7d-b69c-bcfdb5a1a607-(7).png">
+            <input type="file" id="file-bg" accept="image/*">
+        </div>
+        <div class="styled-box">
+            <label>Герой</label>
+            <input type="text" id="imgHero" value="https://i.postimg.cc/2yWsrK35/knight-2.png">
+            <input type="file" id="file-hero" accept="image/*">
+        </div>
+        <div class="styled-box">
+            <label>Босс</label>
+            <input type="text" id="imgBoss" value="https://i.postimg.cc/VvtxmV5k/b70f9739-0d07-4828-aac0-b4b09d0961d5-removalai-preview.png">
+            <input type="file" id="file-boss" accept="image/*">
+        </div>
+        <div class="styled-box">
+            <label>Снаряд</label>
+            <input type="text" id="imgProjectile" value="https://i.postimg.cc/Fz5gSWF0/ognennyj-sar.png">
+            <input type="file" id="file-projectile" accept="image/*">
+        </div>
+        <div class="styled-box">
+            <label>Кристалл Задания</label>
+            <input type="text" id="imgTaskArtifact" value="https://i.postimg.cc/KvL74jJr/pngwing-com-(80).png">
+            <input type="file" id="file-task" accept="image/*">
+        </div>
+
+        <h3>Финальные экраны</h3>
+        <div class="form-group flex-col"><label>Текст победы</label><input type="text" id="winText" value="ПОБЕДА! Ты стал новым Царем горы!"></div>
+        <div class="styled-box">
+            <label>Картинка поражения</label>
+            <input type="text" id="imgLose" value="https://i.postimg.cc/bJG47dxC/pngwing-com-(9).png">
+            <input type="file" id="file-lose" accept="image/*">
+        </div>
+        <div class="form-group flex-col"><label>Текст поражения</label><input type="text" id="loseText" value="Гора оказалась тебе не по зубам..."></div>
+        <div class="form-group flex-col"><label>Кнопка "Заново"</label><input type="text" id="restartButtonText" value="ИГРАТЬ ЗАНОВО"></div>
+        
+        <button class="gen-btn" id="copyBtn" onclick="copyCode()">СГЕНЕРИРОВАТЬ IFRAME-КОД</button>
+        <textarea id="generated-code" readonly placeholder="Ваш код появится здесь..."></textarea>
+    </div>
+
+    <div class="preview-panel">
+        <h2 style="color: #fff; margin-top:0; font-size: 20px;">Предпросмотр</h2>
+        <button id="popoutBtn" class="gen-btn" style="margin-top:0; margin-bottom: 10px; padding: 10px; font-size: 14px;">Открыть в новом окне</button>
+        <iframe id="previewFrame" src="" frameborder="0" allow="autoplay"></iframe>
+    </div>
+
+    <script>
+        const allInputs = document.querySelectorAll('.editor-panel input, .editor-panel select, .editor-panel textarea');
+        let previewWindow = null;
+
+        function handleFileUpload(event, targetInputId) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(targetInputId).value = e.target.result;
+                debounceGenerate();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('file-bg').addEventListener('change', (e) => handleFileUpload(e, 'imgBackground'));
+            document.getElementById('file-hero').addEventListener('change', (e) => handleFileUpload(e, 'imgHero'));
+            document.getElementById('file-boss').addEventListener('change', (e) => handleFileUpload(e, 'imgBoss'));
+            document.getElementById('file-projectile').addEventListener('change', (e) => handleFileUpload(e, 'imgProjectile'));
+            document.getElementById('file-task').addEventListener('change', (e) => handleFileUpload(e, 'imgTaskArtifact'));
+            document.getElementById('file-lose').addEventListener('change', (e) => handleFileUpload(e, 'imgLose'));
+            
+            document.getElementById('popoutBtn').addEventListener('click', popoutPreview);
+
+            updateVal('projectileSpeed', 'projSpeedVal', 'x');
+            updateVal('projectileFrequency', 'projFreqVal', ' сек');
+            updateVal('projectileSize', 'projSizeVal', 'px');
+            updateVal('taskFrequency', 'taskFreqVal', ' сек');
+            updateVal('heroSize', 'heroSizeVal', 'px');
+            updateVal('heroPosY', 'heroPosYVal', '%');
+            updateVal('bossSize', 'bossSizeVal', 'px');
+            updateVal('bossPosX', 'bossPosXVal', '%');
+            updateVal('bossPosY', 'bossPosYVal', '%');
+            
+            allInputs.forEach(el => {
+                const eventType = (el.type === 'range') ? 'change' : 'input';
+                el.addEventListener(eventType, debounceGenerate);
+                if (el.type !== 'range') {
+                   el.addEventListener('change', debounceGenerate);
+                }
+            });
+
+            toggleTaskInputs();
+            debounceGenerate();
+        });
+
+        function updateVal(inputId, displayId, suffix) {
+            document.getElementById(displayId).innerText = document.getElementById(inputId).value + suffix;
+        }
+
+        function toggleTaskInputs() { 
+            const mode = document.getElementById('gameMode').value; 
+            ['quiz', 'fill', 'order'].forEach(id => { 
+                document.getElementById(`input-${id}`).style.display = mode === id ? 'block' : 'none'; 
+            });
+            document.getElementById('check-btn-text-group').style.display = mode === 'fill' ? 'block' : 'none';
+        }
+
+        function getInputs() {
+            const mode = document.getElementById('gameMode').value; 
+            let tasks = [];
+            if (mode === 'quiz') { 
+                const q = document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(Boolean);
+                const a = document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(Boolean); 
+                for (let i=0; i<Math.min(q.length, a.length); i++) { 
+                    const p = a[i].split('|').map(s=>s.trim()).filter(Boolean); 
+                    if(p.length > 0) tasks.push({q: q[i], c: p[0], w: p.slice(1)}); 
+                }
+            }
+            else if (mode === 'fill') { 
+                const q = document.getElementById('fillQList').value.split('\n').map(s=>s.trim()).filter(Boolean);
+                const a = document.getElementById('fillAList').value.split('\n').map(s=>s.trim()).filter(Boolean); 
+                for (let i=0; i<Math.min(q.length, a.length); i++) tasks.push({q: q[i], c: a[i]}); 
+            }
+            else if (mode === 'order') { 
+                const s = document.getElementById('orderList').value.split('\n').map(s=>s.trim()).filter(s => s.split(' ').length > 1); 
+                for(const sent of s) tasks.push({sentence: sent}); 
+            }
+            if (tasks.length === 0) { tasks.push({ q: "В редакторе нет заданий!", c: "Понятно", w: [] }); }
+
+            return {
+                title: document.getElementById('gameTitle').value,
+                titleColor: document.getElementById('titleColor').value,
+                lang: document.getElementById('uiLang').value,
+                startButtonText: document.getElementById('startButtonText').value,
+                startButtonColor: document.getElementById('startButtonColor').value,
+                startButtonTextColor: document.getElementById('startButtonTextColor').value,
+                initialLives: document.getElementById('initialLives').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                fontColor: document.getElementById('qColor').value,
+                fontSize: document.getElementById('qFontSize').value,
+                qFontSize: document.getElementById('qFontSize').value,
+                qColor: document.getElementById('qColor').value,
+                aFontSize: document.getElementById('aFontSize').value,
+                aColor: document.getElementById('aColor').value,
+                borderColor: document.getElementById('neonColor').value,
+                colorQBox: document.getElementById('colorQBox').value,
+                colorABox: document.getElementById('colorABox').value,
+                projectileSpeed: document.getElementById('projectileSpeed').value,
+                projectileFrequency: document.getElementById('projectileFrequency').value,
+                projectileSize: document.getElementById('projectileSize').value,
+                taskFrequency: document.getElementById('taskFrequency').value,
+                mode: mode,
+                tasks: tasks,
+                heroSize: document.getElementById('heroSize').value,
+                bossSize: document.getElementById('bossSize').value,
+                heroPosY: document.getElementById('heroPosY').value,
+                bossPosY: document.getElementById('bossPosY').value,
+                bossPosX: document.getElementById('bossPosX').value,
+                imgBackground: document.getElementById('imgBackground').value,
+                imgHero: document.getElementById('imgHero').value,
+                imgBoss: document.getElementById('imgBoss').value,
+                imgProjectile: document.getElementById('imgProjectile').value,
+                imgTaskArtifact: document.getElementById('imgTaskArtifact').value,
+                winText: document.getElementById('winText').value,
+                imgLose: document.getElementById('imgLose').value,
+                loseText: document.getElementById('loseText').value,
+                restartButtonText: document.getElementById('restartButtonText').value,
+                checkButtonText: document.getElementById('checkButtonText').value,
+            };
+        }
+
+        function generateGameHtml() {
+            const conf = getInputs();
+
+            let hexToRgb = (hex) => {
+                if(!hex || hex.length !== 7) return 'rgba(0,0,0,0.95)';
+                let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, 0.95)`;
+            };
+            let qBoxRgba = hexToRgb(conf.colorQBox);
+            let aBoxRgba = hexToRgb(conf.colorABox);
+
+            return `<!DOCTYPE html>
+<html lang="${conf.lang.toLowerCase()}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"><\/script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Alice&family=Amatic+SC:wght@700&family=Bangers&family=Caveat:wght@700&family=Comfortaa:wght@700&family=Exo+2:wght@600&family=Jura:wght@700&family=Kurale&family=Lobster&family=Montserrat:wght@600;800&family=Neucha&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600&family=Poppins:wght@600;800&family=Press+Start+2P&family=Roboto:wght@500;700&family=Rubik+Bubbles&family=Russo+One&display=swap');
+    
+    :root { 
+        --font-family: ${conf.fontFamily}, sans-serif; 
+        --font-size: ${conf.fontSize}px; 
+        --font-color: ${conf.fontColor}; 
+        --border-color: ${conf.borderColor}; 
+        --boss-top: ${conf.bossPosY}%; 
+        --boss-left: ${conf.bossPosX}%; 
+        --hero-size: ${conf.heroSize}px;
+    }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+    #game-app { position: relative; width: 100%; height: 100%; background: url('${conf.imgBackground}') center/cover no-repeat; user-select: none; cursor: none; box-sizing: border-box; }
+    #game-app * { box-sizing: border-box; }
+    .hidden { display: none !important; }
+    
+    #hero { position: absolute; bottom: ${conf.heroPosY}%; left: 50%; width: var(--hero-size); height: var(--hero-size); background: url('${conf.imgHero}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.5)); transition: opacity 0.2s, transform 0.2s; z-index: 10;}
+    
+    /* ЭНЕРГЕТИЧЕСКАЯ БРОНЯ */
+    #hero::before {
+        content: '';
+        position: absolute;
+        inset: -20px;
+        border: 4px solid #00d2ff;
+        border-radius: 50%;
+        box-shadow: 0 0 30px #00d2ff, inset 0 0 20px #00d2ff;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        pointer-events: none;
+        z-index: 11;
+    }
+    #hero.has-shield::before {
+        opacity: 1;
+        animation: shieldPulseActive 1s infinite alternate ease-in-out;
+    }
+    #hero.invincible { animation: invincibleBlink 0.3s linear infinite; }
+    @keyframes invincibleBlink { 50% { opacity: 0.5; } }
+    @keyframes shieldPulseActive {
+        0% { transform: scale(0.95); box-shadow: 0 0 15px #00d2ff, inset 0 0 10px #00d2ff; }
+        100% { transform: scale(1.05); box-shadow: 0 0 35px #00d2ff, inset 0 0 25px #00d2ff; }
+    }
+    
+    #hero.glowing { animation: goldGlow 2s infinite alternate; }
+    @keyframes goldGlow { from { filter: drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 15px #ffb800); } to { filter: drop-shadow(0 0 15px #fff) drop-shadow(0 0 25px #ffd700); } }
+    
+    #boss { position: absolute; top: var(--boss-top); left: var(--boss-left); width: ${conf.bossSize}px; height: ${conf.bossSize}px; background: url('${conf.imgBoss}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.7)); transition: opacity 0.5s, filter 0.5s, transform 0.2s; z-index: 9; }
+    #boss.frozen { filter: hue-rotate(180deg) brightness(1.2) saturate(2) drop-shadow(0 0 15px #00aaff); }
+    @keyframes shake-anim { 0%, 100% { transform: translate(-50%, 0) rotate(0); } 25% { transform: translate(-51%, 1px) rotate(-1deg); } 75% { transform: translate(-49%, -1px) rotate(1deg); } }
+    .boss-periodic-shake { animation: shake-anim 0.4s 2; }
+    .boss-win-shake { animation: shake-anim 0.2s 10 !important; }
+    
+    .particle { position: absolute; background: #2ecc71; border-radius: 50%; pointer-events: none; animation: flyOut 1.2s ease-out forwards; z-index: 101; }
+    @keyframes flyOut { to { transform: translate(var(--x), var(--y)); opacity: 0; } }
+    
+    .projectile { position: absolute; width: ${conf.projectileSize}px; height: ${conf.projectileSize}px; background: url('${conf.imgProjectile}') center/contain no-repeat; z-index: 5; transform: translate(-50%, -50%); }
+    
+    /* ДИНАМИЧЕСКИЕ ПРЕДМЕТЫ НА ЗЕМЛЕ И В ВОЗДУХЕ */
+    .collectible { 
+        position: absolute; 
+        width: 50px; 
+        height: 50px; 
+        z-index: 20; 
+        transform: translateX(-50%); 
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    .fall-item { animation: itemFloat 3s ease-in-out infinite; }
+    
+    /* Анимация пульсации для предметов */
+    @keyframes groundItemPulse {
+        0% { transform: translateX(-50%) scale(0.9); }
+        100% { transform: translateX(-50%) scale(1.1); }
+    }
+    
+    /* СТИЛИ КРИСТАЛЛА */
+    .task-item { animation-name: itemFloat, taskGlow; animation-duration: 3s, 2s; animation-iteration-count: infinite, infinite; }
+    @keyframes itemFloat { 0%, 100% { transform: translateY(0) translateX(-50%); } 50% { transform: translateY(-8px) translateX(-50%); } }
+    @keyframes taskGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 180, 0.7)); } 50% { filter: drop-shadow(0 0 15px rgba(255, 255, 180, 1)); } }
+    
+    /* 1. НЕОНОВАЯ ЗЕЛЕНАЯ СФЕРА ЖИЗНИ */
+    .life-sphere {
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        background: radial-gradient(circle, #2ecc71 30%, #27ae60 100%);
+        border: 3px dashed #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #2ecc71, inset 0 0 10px #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #fff;
+        cursor: pointer;
+        animation: groundItemPulse 1s infinite alternate ease-in-out;
+        z-index: 20;
+        transform: translateX(-50%);
+    }
+    
+    /* 2. ЛАЗУРНАЯ РУНА БРОНИ (ЩИТ) */
+    .armor-pickup {
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        background: radial-gradient(circle, #00d2ff 30%, #0081a7);
+        border: 3px solid #fff;
+        border-radius: 12px;
+        box-shadow: 0 0 20px #00d2ff, inset 0 0 10px #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff;
+        animation: groundItemPulse 1s infinite alternate ease-in-out;
+        z-index: 20;
+        transform: translateX(-50%);
+    }
+    
+    #ui-layer { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; z-index: 50; }
+    #lives-bar, #tasks-bar { background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px; }
+    #lives-bar .top-heart { font-size: 24px; filter: drop-shadow(0 0 5px #ff2a6d); display: inline-block; animation: heartpulse 1.5s infinite alternate; }
+    @keyframes heartpulse { 0% { transform: scale(0.9); } 100% { transform: scale(1.1); } }
+    
+    #tasks-bar img { width: 24px; height: 24px; }
+    #tasks-bar span { color: white; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: bold; }
+    
+    .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; cursor: auto; padding: 20px; text-align: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+    .screen h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-family: 'Russo One', sans-serif; text-transform: uppercase; margin: 0 0 30px 0; color: ${conf.titleColor}; }
+    .screen img { max-width: clamp(150px, 30vh, 250px); max-height: 30vh; object-fit: contain; margin-bottom: 20px; }
+    .screen p { font-size: clamp(1rem, 2.5vw, 1.5rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: white;}
+    
+    /* УВЕЛИЧЕННАЯ КНОПКА СТАРТА */
+    .screen button { font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: clamp(1.1rem, 2.5vw, 1.4rem); padding: 18px 50px; border-radius: 50px; border: 3px solid white; color: ${conf.startButtonTextColor}; cursor: pointer; transition: transform 0.2s; letter-spacing: 1px; }
+    .screen button:hover { transform: scale(1.1); }
+    #start-btn { background-color: ${conf.startButtonColor}; }
+    
+    /* НАСТРОЙКА ЦВЕТА ФОНА ВОПРОСА */
+    .task-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 600px; background: ${qBoxRgba}; padding: 40px; border-radius: 20px; border: 3px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px var(--border-color); font-family: var(--font-family); color: var(--font-color); z-index: 100; cursor: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .task-panel.incorrect-flash { animation: flash-red 0.6s; }
+    @keyframes flash-red { 0%, 100% { border-color: var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); } 50% { border-color: #e74c3c; box-shadow: 0 0 25px 3px rgba(231, 76, 60, 0.7); } }
+    
+    #task-question { font-size: ${conf.qFontSize}px; color: ${conf.qColor}; margin: 0; line-height: 1.4; text-align: center; }
+    #task-answers { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; }
+    
+    #task-answers button { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family); font-size: ${conf.aFontSize}px; color: ${conf.aColor}; padding: 12px 24px; border: 2px solid var(--border-color); background: ${aBoxRgba}; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+    #task-answers button:hover { background: #8ECA3C; color: #1a1a2e; border-color: #8ECA3C; transform: scale(1.05); }
+    #task-answers button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .input-fill { width: 100%; max-width: 350px; padding: 12px; font-family: var(--font-family); font-size: ${conf.aFontSize}px; text-align: center; border-radius: 8px; border: 2px solid var(--border-color); background: #333; color: #fff; outline: none;}
+    .input-fill:focus { border-color: #8ECA3C; }
+    
+    #task-check-btn { font-family: var(--font-family); font-weight: bold; width: 100%; max-width: 350px; padding: 12px 20px; font-size: calc(var(--font-size) * 0.8); border: none; border-radius: 8px; background-color: #8ECA3C; color: #1a1a2e; cursor: pointer; transition: transform 0.2s, background-color 0.2s; }
+    #task-check-btn:hover { background-color: #76aa30; transform: scale(1.05); }
+    
+    #user-sequence-display { min-height: 50px; width: 100%; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px dashed var(--border-color); padding: 10px; text-align: center; font-size: ${conf.aFontSize}px; word-spacing: 5px; }
+    
+    .win-text-frame { position: absolute; z-index: 100; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 700px; background: rgba(20, 20, 30, 0.85); backdrop-filter: blur(3px); color: #fff; padding: 40px; border-radius: 20px; border: 2px solid #8ECA3C; box-shadow: 0 0 30px rgba(142, 202, 60, 0.5); text-align: center; }
+    .win-text-frame p { font-family: 'Russo One', sans-serif; font-size: clamp(1.2rem, 3vw, 2rem); margin: 0 0 30px; text-transform: uppercase; color: #8ECA3C; }
+    .win-text-frame button { font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: 1rem; padding: 10px 30px; border-radius: 25px; border: 2px solid #fff; background: transparent; color: #fff; cursor: pointer; transition: all 0.2s; }
+    .win-text-frame button:hover { background: #8ECA3C; color: #14141e; border-color: #8ECA3C; }
+    
+    .floating-text { position: absolute; font-family: 'Russo One', sans-serif; font-size: 20px; text-shadow: 1px 1px 2px black; pointer-events: none; animation: floatUp 1.5s ease-out forwards; z-index: 100; }
+    @keyframes floatUp { to { transform: translate(-50%, -50px); opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="game-app" tabindex="0">
+    <div id="ui-layer"><div id="lives-bar"></div><div id="tasks-bar"></div></div>
+    <div id="boss"></div><div id="hero"></div>
+    <div id="start-screen" class="screen"><h1>${conf.title}</h1><button id="start-btn">${conf.startButtonText}</button></div>
+    <div id="task-board" class="task-panel hidden">
+        <p id="task-question"></p>
+        <div id="user-sequence-display" class="hidden"></div>
+        <div id="task-answers"></div>
+    </div>
+    <div id="win-text-panel" class="win-text-frame hidden"><p>${conf.winText}</p><button>${conf.restartButtonText}</button></div>
+    <div id="lose-screen" class="screen hidden"><img src="${conf.imgLose}"><p>${conf.loseText}</p><button>${conf.restartButtonText}</button></div>
+</div>
+<script>
+    const conf = ${JSON.stringify(conf)};
+    const dom = { 
+        app: document.getElementById('game-app'), 
+        hero: document.getElementById('hero'), 
+        boss: document.getElementById('boss'), 
+        livesBar: document.getElementById('lives-bar'), 
+        tasksBar: document.getElementById('tasks-bar'), 
+        startScreen: document.getElementById('start-screen'), 
+        taskBoard: document.getElementById('task-board'), 
+        winTextPanel: document.getElementById('win-text-panel'), 
+        loseScreen: document.getElementById('lose-screen'), 
+        qEl: document.getElementById('task-question'), 
+        aEl: document.getElementById('task-answers'), 
+        userSeqDisplay: document.getElementById('user-sequence-display') 
+    };
+    
+    const game = { 
+        isPlaying: false, 
+        lives: parseInt(conf.initialLives), 
+        isInvincible: false, 
+        isShieldActive: false,
+        tasksDone: 0, 
+        totalTasks: conf.tasks.length, 
+        heroX: 50, 
+        heroVX: 0, 
+        items: [], 
+        spawners: [], 
+        KEYBOARD_SPEED: 1.2, 
+        correctAnswerCombo: 0, 
+        isBossFrozen: false, 
+        freezeDuration: 0, 
+        bossAnimTimeout: null,
+        shieldTimeout: null,
+        
+        init() {
+            dom.winTextPanel.querySelector('button').onclick = () => location.reload(); 
+            dom.loseScreen.querySelector('button').onclick = () => location.reload();
+            dom.startScreen.querySelector('button').onclick = () => { dom.startScreen.classList.add('hidden'); this.start(); };
+            
+            dom.app.addEventListener('pointermove', e => { 
+                if (!this.isPlaying) return; 
+                const rect = dom.app.getBoundingClientRect(); 
+                this.heroX = (e.clientX - rect.left) / rect.width * 100; 
+            });
+            
+            window.addEventListener('keydown', e => { 
+                if (dom.taskBoard.classList.contains('hidden')) { 
+                    if(e.key === 'ArrowLeft') this.heroVX = -this.KEYBOARD_SPEED; 
+                    if(e.key === 'ArrowRight') this.heroVX = this.KEYBOARD_SPEED; 
+                }
+            });
+            window.addEventListener('keyup', e => { 
+                if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') this.heroVX = 0; 
+            });
+            this.updateUI();
+        },
+        
+        start() { 
+            this.lives = parseInt(conf.initialLives); 
+            this.tasksDone = 0; 
+            this.isShieldActive = false;
+            this.updateUI(); 
+            this.isPlaying = true; 
+            this.gameLoop(); 
+            this.startSpawners(); 
+            dom.app.focus(); 
+            this.animateBoss(); 
+        },
+        
+        pause(showTaskBoard = false) { 
+            clearTimeout(this.bossAnimTimeout); 
+            this.isPlaying = false; 
+            if (showTaskBoard) dom.taskBoard.classList.remove('hidden'); 
+            this.stopSpawners(); 
+        },
+        
+        resume() { 
+            dom.taskBoard.classList.add('hidden'); 
+            if (this.freezeDuration > 0) {
+                this.isBossFrozen = true;
+                dom.boss.classList.add('frozen');
+                this.freezeDuration--;
+            } else {
+                this.isBossFrozen = false;
+                dom.boss.classList.remove('frozen');
+            }
+            this.isPlaying = true; 
+            this.gameLoop(); 
+            this.startSpawners(); 
+            this.animateBoss(); 
+            dom.app.focus();
+            this.spawnProjectile();
+        },
+        
+        animateBoss() {
+            if (!this.isPlaying || this.isBossFrozen) return;
+            const delay = Math.random() * 3000 + 3000;
+            this.bossAnimTimeout = setTimeout(() => {
+                dom.boss.classList.add('boss-periodic-shake');
+                setTimeout(() => dom.boss.classList.remove('boss-periodic-shake'), 800);
+                this.animateBoss();
+            }, delay);
+        },
+        
+        startSpawners() {
+            this.stopSpawners();
+            const spawn = (fn, interval) => { 
+                const id = setInterval(() => { if (this.isPlaying) fn.call(this); }, interval); 
+                this.spawners.push(id); 
+            };
+            spawn(this.spawnProjectile, conf.projectileFrequency * 1000);
+            spawn(this.spawnTask, conf.taskFrequency * 1000);
+            
+            // Жизни и Броня теперь спавнятся в 2 раза реже (каждые 16 секунд)
+            spawn(this.spawnGroundBonus, 16000); 
+        },
+        
+        stopSpawners() { 
+            this.spawners.forEach(clearInterval); 
+            this.spawners = []; 
+        },
+        
+        gameLoop() {
+            if (!this.isPlaying) return;
+            this.heroX = Math.max(0, Math.min(100, this.heroX + this.heroVX));
+            dom.hero.style.left = this.heroX + '%';
+            const heroRect = dom.hero.getBoundingClientRect();
+            const appRect = dom.app.getBoundingClientRect();
+            
+            for (let i = this.items.length - 1; i >= 0; i--) {
+                const item = this.items[i];
+                if (!item.el.parentElement) { this.items.splice(i, 1); continue; }
+                if (item.isMoving) {
+                    item.x += item.vx;
+                    item.y += item.vy;
+                    item.el.style.left = item.x + '%';
+                    item.el.style.top = item.y + '%';
+                }
+                const itemRect = item.el.getBoundingClientRect();
+                if (item.isMoving && itemRect.top > appRect.bottom) { item.el.remove(); this.items.splice(i, 1); continue; }
+                if (this.checkRectCollision(heroRect, itemRect)) { this.handleCollision(item, i); }
+            }
+            requestAnimationFrame(() => this.gameLoop());
+        },
+        
+        updateUI() {
+            dom.livesBar.innerHTML = Array(this.lives).fill('<span class="top-heart">❤️</span>').join('');
+            dom.tasksBar.innerHTML = '<img src="' + conf.imgTaskArtifact + '"><span>' + this.tasksDone + ' / ' + this.totalTasks + '</span>';
+        },
+        
+        checkRectCollision: (r1, r2) => !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom),
+        
+        handleCollision(item, index) {
+            const heroRect = dom.hero.getBoundingClientRect();
+            
+            if (item.type === 'projectile') {
+                if (this.isShieldActive) {
+                    this.showFloatingText('🛡️ BLOCKED!', '#00d2ff', heroRect);
+                } else if (!this.isInvincible) {
+                    this.lives--; 
+                    this.updateUI(); 
+                    this.isInvincible = true; 
+                    dom.hero.classList.add('invincible'); 
+                    setTimeout(() => { this.isInvincible = false; dom.hero.classList.remove('invincible'); }, 1500);
+                    if (this.lives <= 0) this.gameOver(false); 
+                }
+            }
+            else if (item.type === 'task') {
+                this.items.forEach(i => { if(i.type === 'projectile') i.el.remove(); });
+                this.items = this.items.filter(i => i.type !== 'projectile');
+                this.pause(true); 
+                this.showTask(conf.tasks[this.tasksDone]);
+            }
+            else if (item.type === 'life') {
+                if (this.lives < parseInt(conf.initialLives)) { 
+                    this.lives++; 
+                    this.updateUI(); 
+                    this.showFloatingText('+1 ❤️', '#2ecc71', heroRect);
+                } else {
+                    this.showFloatingText('MAX HP', '#8ECA3C', heroRect);
+                }
+            }
+            else if (item.type === 'armor') {
+                this.activateShield(7000); 
+                this.showFloatingText('🛡️ SHIELD ACTIVE!', '#00d2ff', heroRect);
+            }
+            
+            if (item.el.parentElement) { item.el.remove(); }
+            this.items.splice(index, 1);
+        },
+        
+        activateShield(duration) {
+            this.isShieldActive = true;
+            dom.hero.classList.add('has-shield');
+            clearTimeout(this.shieldTimeout);
+            this.shieldTimeout = setTimeout(() => {
+                this.isShieldActive = false;
+                dom.hero.classList.remove('has-shield');
+            }, duration);
+        },
+        
+        showFloatingText(text, color, rect) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.textContent = text;
+            el.style.color = color;
+            el.style.left = (rect.left + rect.width / 2) + 'px';
+            el.style.top = rect.top + 'px';
+            el.style.transform = 'translateX(-50%)';
+            dom.app.appendChild(el);
+            setTimeout(() => el.remove(), 1500);
+        },
+        
+        handleIncorrectAnswer() {
+            this.lives--; 
+            this.updateUI(); 
+            this.correctAnswerCombo = 0;
+            dom.taskBoard.classList.add('incorrect-flash');
+            setTimeout(() => dom.taskBoard.classList.remove('incorrect-flash'), 600);
+            if (this.lives <= 0) { dom.taskBoard.classList.add('hidden'); this.gameOver(false); }
+        },
+        
+        spawnItem(config) {
+            const itemEl = document.createElement('div');
+            itemEl.className = config.className;
+            
+            if (config.type === 'task') {
+                itemEl.style.backgroundImage = "url('" + conf.imgTaskArtifact + "')";
+            }
+            if (config.type === 'life') {
+                itemEl.innerHTML = '❤️';
+            }
+            if (config.type === 'armor') {
+                itemEl.innerHTML = '🛡️';
+            }
+            
+            const item = { 
+                el: itemEl, 
+                type: config.type, 
+                x: config.x, 
+                y: config.y || 0, 
+                vx: config.vx || 0, 
+                vy: config.vy || 0, 
+                isMoving: !!(config.vx || config.vy) 
+            };
+            
+            itemEl.style.left = config.x + '%';
+            if (config.y !== null && config.y !== undefined) {
+                itemEl.style.top = config.y + '%';
+            } else {
+                const groundY = parseFloat(conf.heroPosY) + 3; 
+                itemEl.style.bottom = groundY + '%';
+            }
+            
+            this.items.push(item);
+            dom.app.appendChild(itemEl);
+            
+            if (!item.isMoving) {
+                setTimeout(() => {
+                    if (item.el.parentElement) {
+                        item.el.remove();
+                        const idx = this.items.indexOf(item);
+                        if (idx > -1) this.items.splice(idx, 1);
+                    }
+                }, 6000);
+            }
+            
+            return item;
+        },
+        
+        spawnGroundBonus() {
+            if (Math.random() < 0.5) {
+                this.spawnLife();
+            } else {
+                this.spawnArmor();
+            }
+        },
+        
+        spawnProjectile() {
+            if(this.isBossFrozen) return;
+            const bossRect = dom.boss.getBoundingClientRect(), heroRect = dom.hero.getBoundingClientRect(), appRect = dom.app.getBoundingClientRect();
+            const startX = (bossRect.left + bossRect.width / 2 - appRect.left) / appRect.width * 100;
+            const startY = (bossRect.top + bossRect.height / 2 - appRect.top) / appRect.height * 100;
+            const targetX = (heroRect.left + heroRect.width / 2 - appRect.left) / appRect.width * 100;
+            const targetY = (heroRect.top + heroRect.height / 2 - appRect.top) / appRect.height * 100;
+            const angle = Math.atan2(targetY - startY, targetX - startX);
+            
+            const createShot = (a) => {
+                const speed = parseFloat(conf.projectileSpeed) * 0.4;
+                this.spawnItem({ 
+                    type: 'projectile', 
+                    className: 'projectile', 
+                    x: startX, 
+                    y: startY, 
+                    vx: Math.cos(a) * speed, 
+                    vy: Math.sin(a) * speed 
+                });
+            };
+            if (Math.random() < 0.05) { 
+                createShot(angle - 0.25); createShot(angle); createShot(angle + 0.25); 
+            } else { 
+                createShot(angle); 
+            }
+        },
+        
+        spawnTask() { 
+            if (this.tasksDone >= this.totalTasks || this.items.some(i => i.type === 'task')) return; 
+            const x = 10 + Math.random() * 80; 
+            this.spawnItem({ 
+                type: 'task', 
+                className: 'collectible task-item fall-item', 
+                x: x, 
+                y: -10, 
+                vy: 0.3 
+            }); 
+        },
+        
+        spawnLife() { 
+            if (this.items.some(i => i.type === 'life')) return;
+            const x = 15 + Math.random() * 70;
+            this.spawnItem({ 
+                type: 'life', 
+                className: 'life-sphere', 
+                x: x, 
+                y: null 
+            });
+        },
+        
+        spawnArmor() {
+            if (this.isShieldActive || this.items.some(i => i.type === 'armor')) return;
+            const x = 15 + Math.random() * 70;
+            this.spawnItem({
+                type: 'armor',
+                className: 'armor-pickup',
+                x: x,
+                y: null 
+            });
+        },
+        
+        taskSuccess() {
+            this.tasksDone++; 
+            this.correctAnswerCombo++; 
+            this.updateUI(); 
+            if(this.correctAnswerCombo >= 5) { 
+                this.freezeDuration = 2; 
+                this.correctAnswerCombo = 0; 
+            }
+            if (this.tasksDone >= this.totalTasks) { 
+                dom.taskBoard.classList.add('hidden'); 
+                this.gameOver(true); 
+            } else { 
+                this.resume(); 
+            } 
+        },
+        
+        showTask(task) { 
+            dom.qEl.innerHTML = ''; 
+            dom.aEl.innerHTML = ''; 
+            dom.userSeqDisplay.classList.add('hidden'); 
+            
+            if(task.sentence) {
+                dom.qEl.textContent = 'Расставьте слова в правильном порядке';
+                dom.userSeqDisplay.classList.remove('hidden');
+                dom.userSeqDisplay.textContent = '';
+                const c = task.sentence.split(' '), s = [...c].sort(() => 0.5 - Math.random());
+                let u = [];
+                const w = s.map(word => {
+                    const b = document.createElement('button');
+                    b.innerHTML = word;
+                    b.onclick = () => {
+                        u.push(word);
+                        b.disabled = true;
+                        dom.userSeqDisplay.textContent = u.join(' ');
+                        if(u.length === c.length) {
+                            if(u.join(' ') === task.sentence) {
+                                setTimeout(() => this.taskSuccess(), 300);
+                            } else {
+                                this.handleIncorrectAnswer();
+                                setTimeout(() => {
+                                    u = [];
+                                    dom.userSeqDisplay.textContent = '';
+                                    w.forEach(b => b.disabled = false);
+                                }, 1000);
+                            }
+                        }
+                    };
+                    dom.aEl.appendChild(b);
+                    return b;
+                });
+            } else if(task.c && task.w) {
+                dom.qEl.innerHTML = task.q;
+                [task.c, ...task.w].sort(() => 0.5 - Math.random()).forEach(o => {
+                    const b = document.createElement('button');
+                    b.innerHTML = o;
+                    b.onclick = () => (o === task.c) ? this.taskSuccess() : this.handleIncorrectAnswer();
+                    dom.aEl.appendChild(b);
+                });
+            } else if(task.c) {
+                dom.qEl.innerHTML = task.q.replace(/_+/, '___');
+                
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:15px;width:100%;';
+                
+                const i = document.createElement('input');
+                i.className = 'input-fill';
+                i.placeholder = '???';
+                
+                const btn = document.createElement('button');
+                btn.id = 'task-check-btn';
+                btn.textContent = conf.checkButtonText || 'ПРОВЕРИТЬ';
+                
+                wrap.appendChild(i);
+                wrap.appendChild(btn);
+                dom.aEl.appendChild(wrap);
+                
+                const ch = () => (i.value.trim().toLowerCase() === task.c.trim().toLowerCase()) ? this.taskSuccess() : this.handleIncorrectAnswer();
+                btn.onclick = ch;
+                i.onkeydown = e => { if (e.key === 'Enter') ch(); };
+                setTimeout(() => i.focus(), 100);
+            }
+            
+            setTimeout(() => {
+                if (window.renderMathInElement) {
+                    renderMathInElement(dom.taskBoard, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false},
+                            {left: "\\\\(", right: "\\\\)", display: false},
+                            {left: "\\\\[", right: "\\\\]", display: true}
+                        ],
+                        throwOnError: false
+                    });
+                }
+            }, 50);
+        },
+        
+        gameOver(isWin) { 
+            this.isPlaying = false; 
+            clearTimeout(this.bossAnimTimeout); 
+            this.stopSpawners(); 
+            if (isWin) { 
+                this.triggerWinSequence(); 
+            } else { 
+                dom.loseScreen.classList.remove('hidden'); 
+            } 
+        },
+        
+        triggerWinSequence() {
+            this.items.forEach(i => { if (i.el.parentElement) i.el.remove(); }); 
+            this.items = []; 
+            dom.boss.classList.add('boss-win-shake');
+            setTimeout(() => { 
+                dom.boss.classList.remove('boss-win-shake'); 
+                dom.boss.style.opacity = '0'; 
+                this.createBossExplosion(); 
+                setTimeout(() => {
+                    dom.hero.style.transition = '';
+                    dom.hero.style.left = conf.bossPosX + '%';
+                    requestAnimationFrame(() => {
+                        dom.hero.style.bottom = 'auto';
+                        dom.hero.style.transition = 'top 2s ease-in-out';
+                        dom.hero.style.top = conf.bossPosY + '%';
+                    });
+                    setTimeout(() => {
+                        dom.hero.classList.add('glowing');
+                        dom.winTextPanel.classList.remove('hidden');
+                    }, 2000);
+                }, 1200);
+            }, 2000);
+        },
+        
+        createBossExplosion() { 
+            const r = dom.boss.getBoundingClientRect(); 
+            for (let i = 0; i < 60; i++) { 
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const s = Math.random() * 15 + 5;
+                p.style.cssText = 'width:' + s + 'px;height:' + s + 'px;left:' + (r.left + r.width / 2) + 'px;top:' + (r.top + r.height / 2) + 'px;';
+                const a = Math.random() * 360, d = Math.random() * 250 + 50;
+                p.style.setProperty('--x', (Math.cos(a) * d) + 'px');
+                p.style.setProperty('--y', (Math.sin(a) * d) + 'px');
+                dom.app.appendChild(p);
+                setTimeout(() => p.remove(), 1200);
+            } 
+        }
+    };
+    game.init();
+<\/script>
+</body>
+</html>`;
+        }
+
+        function updateAllOutputs() {
+            const gameHtml = generateGameHtml();
+            const escapedHTML = gameHtml.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            document.getElementById('generated-code').value = `<iframe style="width: 100%; height: 100%; border: none; background: transparent;" allowtransparency="true" srcdoc="${escapedHTML}" allow="autoplay"></iframe>`;
+            document.getElementById('previewFrame').srcdoc = gameHtml;
+            if (previewWindow && !previewWindow.closed) {
+                 previewWindow.document.body.innerHTML = '';
+                 previewWindow.document.write(gameHtml);
+                 previewWindow.document.close();
+            }
+        }
+
+        function popoutPreview() {
+            if (previewWindow && !previewWindow.closed) {
+                previewWindow.close();
+            }
+            const gameHtml = generateGameHtml();
+            const width = 1280;
+            const height = 720;
+            const features = `width=${width},height=${height},scrollbars=no,resizable=yes`;
+            previewWindow = window.open('', 'gamePreview', features);
+            previewWindow.document.write(gameHtml);
+            previewWindow.document.close();
+            previewWindow.focus();
+        }
+
+        function copyCode() {
+            updateAllOutputs(); 
+            document.getElementById('generated-code').select(); 
+            document.execCommand('copy');
+            const btn = document.getElementById('copyBtn');
+            btn.innerText = 'СКОПИРОВАНО!'; btn.style.background = '#2ecc71'; btn.style.color = '#fff';
+            setTimeout(() => { btn.innerText = 'СГЕНЕРИРОВАТЬ IFRAME-КОД'; btn.style.background = 'linear-gradient(135deg, #6b9e28, #8ECA3C)'; btn.style.color = '#1a1a2e'; }, 2000);
+        }
+
+        let previewTimeout;
+        function debounceGenerate() { 
+            clearTimeout(previewTimeout); 
+            previewTimeout = setTimeout(updateAllOutputs, 400); 
+        }
+    </script>
+</body>
+</html>
