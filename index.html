@@ -41,8 +41,11 @@
 
         #previewFrame { width: 100%; flex: 1; border: 2px dashed #8ECA3C; border-radius: 15px; background-color: #000;}
         
-        button.gen-btn { background: linear-gradient(135deg, #6b9e28, #8ECA3C); color: #1a1a2e; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 800; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(142, 202, 60, 0.4); margin-top: 20px;}
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        button.gen-btn { flex: 1; min-width: 180px; background: linear-gradient(135deg, #6b9e28, #8ECA3C); color: #1a1a2e; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 800; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(142, 202, 60, 0.4); }
         button.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(142, 202, 60, 0.6); }
+        button.dl-btn { background: linear-gradient(135deg, #27ae60, #2ecc71); color: #ffffff; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
+        button.dl-btn:hover { box-shadow: 0 8px 20px rgba(46, 204, 113, 0.6); }
         
         #generated-code { height: 60px; margin-top: 10px; background: #1a1a2e; border-color: #4b4b6a; color: #4ae38c; font-family: monospace; font-size: 11px;}
     </style>
@@ -180,7 +183,7 @@
         <div class="form-group">
             <label>Тип заданий</label>
             <select id="gameMode" onchange="toggleTaskInputs()">
-                <option value="quiz">Квиз (Выбор ответа)</option>
+                <option value="quiz">Квиз / Вопрос без ответа</option>
                 <option value="fill">Вписать слово (Свободный ввод)</option>
                 <option value="order">Расставить слова (Конструктор фразы)</option>
             </select>
@@ -193,7 +196,8 @@
 
         <div class="form-group">
             <span class="help-text">
-                <b>МАТЕМАТИКА (LaTeX):</b> Код автоматически распознает формулы, если обернуть их в знаки доллара. Например: <code>$x^2$</code> или <code>$$\frac{a}{b}$$</code>.
+                <b>💡 ВОПРОС БЕЗ ОТВЕТА:</b> В режиме Квиза, если оставить поле ответов пустым для строки, появится просто сообщение с кнопкой «ЗАКРЫТЬ».<br>
+                <b>МАТЕМАТИКА (LaTeX):</b> Оберните формулы в знаки доллара: <code>$x^2$</code> или <code>$$\frac{a}{b}$$</code>.
             </span>
         </div>
 
@@ -201,11 +205,11 @@
             <div class="flex-row" style="align-items: flex-start;">
                 <div class="form-group flex-col">
                     <label>ВОПРОСЫ (Каждый на новой строке)</label>
-                    <textarea id="qList">Столица Франции?&#10;Какое животное самое быстрое?&#10;Какая планета третья от Солнца?</textarea>
+                    <textarea id="qList">Столица Франции?&#10;Запомни: Земля вращается вокруг Солнца!&#10;Какое животное самое быстрое?</textarea>
                 </div>
                 <div class="form-group flex-col" style="flex: 1.5;">
                     <label>ВАРИАНТЫ (Правильный | Неправильный...)</label>
-                    <textarea id="aList">Париж | Рим | Берлин&#10;Гепард | Лев | Сапсан&#10;Земля | Марс | Венера</textarea>
+                    <textarea id="aList">Париж | Рим | Берлин&#10;&#10;Гепард | Лев | Сапсан</textarea>
                 </div>
             </div>
         </div>
@@ -231,6 +235,11 @@
         </div>
 
         <h3>Графика (Загрузка или ссылки)</h3>
+        <div class="styled-box">
+            <label>Иконка жизней (Необязательно)</label>
+            <input type="text" id="imgLife" value="" placeholder="По умолчанию emoji ❤️">
+            <input type="file" id="file-life" accept="image/*">
+        </div>
         <div class="styled-box">
             <label>Фон игры</label>
             <input type="text" id="imgBackground" value="https://i.postimg.cc/9096CnzR/e0185c15b34d67ff88cc7d9ff7ac5955-74146936-9128-4b7d-b69c-bcfdb5a1a607-(7).png">
@@ -258,6 +267,14 @@
         </div>
 
         <h3>Финальные экраны</h3>
+        <!-- ГАЛОЧКА: ПЕРЕМЕЩЕНИЕ ГЕРОЯ В КОНЦЕ ИГРЫ -->
+        <div class="styled-box">
+             <div class="flex-row" style="margin: 0; align-items: center; gap:10px;">
+                <input type="checkbox" id="heroMovesToBoss" checked style="width:20px; height:20px; cursor:pointer;">
+                <label style="margin:0; cursor:pointer;" for="heroMovesToBoss">В конце игры герой встает на место босса</label>
+             </div>
+        </div>
+
         <div class="form-group flex-col"><label>Текст победы</label><input type="text" id="winText" value="ПОБЕДА! Ты стал новым Царем горы!"></div>
         <div class="styled-box">
             <label>Картинка поражения</label>
@@ -266,14 +283,18 @@
         </div>
         <div class="form-group flex-col"><label>Текст поражения</label><input type="text" id="loseText" value="Гора оказалась тебе не по зубам..."></div>
         <div class="form-group flex-col"><label>Кнопка "Заново"</label><input type="text" id="restartButtonText" value="ИГРАТЬ ЗАНОВО"></div>
+        <div class="form-group flex-col"><label>Кнопка закрытия инфо-карточки</label><input type="text" id="closeButtonText" value="ЗАКРЫТЬ"></div>
         
-        <button class="gen-btn" id="copyBtn" onclick="copyCode()">СГЕНЕРИРОВАТЬ IFRAME-КОД</button>
-        <textarea id="generated-code" readonly placeholder="Ваш код появится здесь..."></textarea>
+        <div class="btn-group">
+            <button class="gen-btn" id="copyBtn" onclick="copyCode()">Скопировать Iframe</button>
+            <button class="gen-btn dl-btn" id="dlBtn" onclick="downloadHtml()">Скачать HTML файл</button>
+        </div>
+        <textarea id="generated-code" readonly placeholder="Ваш iframe-код появится здесь..."></textarea>
     </div>
 
     <div class="preview-panel">
         <h2 style="color: #fff; margin-top:0; font-size: 20px;">Предпросмотр</h2>
-        <button id="popoutBtn" class="gen-btn" style="margin-top:0; margin-bottom: 10px; padding: 10px; font-size: 14px;">Открыть в новом окне</button>
+        <button id="popoutBtn" class="gen-btn" style="margin-top:0; margin-bottom: 10px; padding: 10px; font-size: 14px; flex:none;">Открыть в новом окне</button>
         <iframe id="previewFrame" src="" frameborder="0" allow="autoplay"></iframe>
     </div>
 
@@ -293,6 +314,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('file-life').addEventListener('change', (e) => handleFileUpload(e, 'imgLife'));
             document.getElementById('file-bg').addEventListener('change', (e) => handleFileUpload(e, 'imgBackground'));
             document.getElementById('file-hero').addEventListener('change', (e) => handleFileUpload(e, 'imgHero'));
             document.getElementById('file-boss').addEventListener('change', (e) => handleFileUpload(e, 'imgBoss'));
@@ -313,9 +335,9 @@
             updateVal('bossPosY', 'bossPosYVal', '%');
             
             allInputs.forEach(el => {
-                const eventType = (el.type === 'range') ? 'change' : 'input';
+                const eventType = (el.type === 'range' || el.type === 'checkbox') ? 'change' : 'input';
                 el.addEventListener(eventType, debounceGenerate);
-                if (el.type !== 'range') {
+                if (el.type !== 'range' && el.type !== 'checkbox') {
                    el.addEventListener('change', debounceGenerate);
                 }
             });
@@ -341,10 +363,15 @@
             let tasks = [];
             if (mode === 'quiz') { 
                 const q = document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(Boolean);
-                const a = document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(Boolean); 
-                for (let i=0; i<Math.min(q.length, a.length); i++) { 
-                    const p = a[i].split('|').map(s=>s.trim()).filter(Boolean); 
-                    if(p.length > 0) tasks.push({q: q[i], c: p[0], w: p.slice(1)}); 
+                const a = document.getElementById('aList').value.split('\n').map(s=>s.trim()); 
+                for (let i=0; i<q.length; i++) { 
+                    const lineA = a[i] || '';
+                    const p = lineA.split('|').map(s=>s.trim()).filter(Boolean); 
+                    if(p.length === 0) {
+                        tasks.push({ q: q[i], infoOnly: true });
+                    } else {
+                        tasks.push({ q: q[i], c: p[0], w: p.slice(1) });
+                    }
                 }
             }
             else if (mode === 'fill') { 
@@ -387,16 +414,19 @@
                 heroPosY: document.getElementById('heroPosY').value,
                 bossPosY: document.getElementById('bossPosY').value,
                 bossPosX: document.getElementById('bossPosX').value,
+                imgLife: document.getElementById('imgLife').value,
                 imgBackground: document.getElementById('imgBackground').value,
                 imgHero: document.getElementById('imgHero').value,
                 imgBoss: document.getElementById('imgBoss').value,
                 imgProjectile: document.getElementById('imgProjectile').value,
                 imgTaskArtifact: document.getElementById('imgTaskArtifact').value,
+                heroMovesToBoss: document.getElementById('heroMovesToBoss').checked,
                 winText: document.getElementById('winText').value,
                 imgLose: document.getElementById('imgLose').value,
                 loseText: document.getElementById('loseText').value,
                 restartButtonText: document.getElementById('restartButtonText').value,
                 checkButtonText: document.getElementById('checkButtonText').value,
+                closeButtonText: document.getElementById('closeButtonText').value,
             };
         }
 
@@ -490,7 +520,6 @@
     }
     .fall-item { animation: itemFloat 3s ease-in-out infinite; }
     
-    /* Анимация пульсации для предметов */
     @keyframes groundItemPulse {
         0% { transform: translateX(-50%) scale(0.9); }
         100% { transform: translateX(-50%) scale(1.1); }
@@ -501,7 +530,7 @@
     @keyframes itemFloat { 0%, 100% { transform: translateY(0) translateX(-50%); } 50% { transform: translateY(-8px) translateX(-50%); } }
     @keyframes taskGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 180, 0.7)); } 50% { filter: drop-shadow(0 0 15px rgba(255, 255, 180, 1)); } }
     
-    /* 1. НЕОНОВАЯ ЗЕЛЕНАЯ СФЕРА ЖИЗНИ */
+    /* СФЕРА ЖИЗНИ */
     .life-sphere {
         position: absolute;
         width: 45px;
@@ -519,9 +548,11 @@
         animation: groundItemPulse 1s infinite alternate ease-in-out;
         z-index: 20;
         transform: translateX(-50%);
+        overflow: hidden;
     }
+    .life-sphere img { width: 75%; height: 75%; object-fit: contain; }
     
-    /* 2. ЛАЗУРНАЯ РУНА БРОНИ (ЩИТ) */
+    /* РУНА БРОНИ (ЩИТ) */
     .armor-pickup {
         position: absolute;
         width: 45px;
@@ -543,6 +574,7 @@
     #ui-layer { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; z-index: 50; }
     #lives-bar, #tasks-bar { background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px; }
     #lives-bar .top-heart { font-size: 24px; filter: drop-shadow(0 0 5px #ff2a6d); display: inline-block; animation: heartpulse 1.5s infinite alternate; }
+    .top-heart-img { width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 0 5px #ff2a6d); display: inline-block; animation: heartpulse 1.5s infinite alternate; }
     @keyframes heartpulse { 0% { transform: scale(0.9); } 100% { transform: scale(1.1); } }
     
     #tasks-bar img { width: 24px; height: 24px; }
@@ -553,12 +585,10 @@
     .screen img { max-width: clamp(150px, 30vh, 250px); max-height: 30vh; object-fit: contain; margin-bottom: 20px; }
     .screen p { font-size: clamp(1rem, 2.5vw, 1.5rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: white;}
     
-    /* УВЕЛИЧЕННАЯ КНОПКА СТАРТА */
     .screen button { font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: clamp(1.1rem, 2.5vw, 1.4rem); padding: 18px 50px; border-radius: 50px; border: 3px solid white; color: ${conf.startButtonTextColor}; cursor: pointer; transition: transform 0.2s; letter-spacing: 1px; }
     .screen button:hover { transform: scale(1.1); }
     #start-btn { background-color: ${conf.startButtonColor}; }
     
-    /* НАСТРОЙКА ЦВЕТА ФОНА ВОПРОСА */
     .task-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 600px; background: ${qBoxRgba}; padding: 40px; border-radius: 20px; border: 3px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px var(--border-color); font-family: var(--font-family); color: var(--font-color); z-index: 100; cursor: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
     .task-panel.incorrect-flash { animation: flash-red 0.6s; }
     @keyframes flash-red { 0%, 100% { border-color: var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); } 50% { border-color: #e74c3c; box-shadow: 0 0 25px 3px rgba(231, 76, 60, 0.7); } }
@@ -578,7 +608,6 @@
     
     #user-sequence-display { min-height: 50px; width: 100%; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px dashed var(--border-color); padding: 10px; text-align: center; font-size: ${conf.aFontSize}px; }
     
-    /* КЛАСС ДЛЯ ОТМЕНЯЕМЫХ СЛОВ-ТЕГОВ */
     .seq-word {
         display: inline-block;
         padding: 6px 14px;
@@ -733,8 +762,6 @@
             };
             spawn(this.spawnProjectile, conf.projectileFrequency * 1000);
             spawn(this.spawnTask, conf.taskFrequency * 1000);
-            
-            // ЗОЛОТАЯ СЕРИДИНА: Жизни и Броня теперь спавнятся каждые 12 секунд
             spawn(this.spawnGroundBonus, 12000); 
         },
         
@@ -767,7 +794,13 @@
         },
         
         updateUI() {
-            dom.livesBar.innerHTML = Array(this.lives).fill('<span class="top-heart">❤️</span>').join('');
+            let heartHtml = '';
+            if (conf.imgLife) {
+                heartHtml = '<img class="top-heart-img" src="' + conf.imgLife + '">';
+            } else {
+                heartHtml = '<span class="top-heart">❤️</span>';
+            }
+            dom.livesBar.innerHTML = Array(this.lives).fill(heartHtml).join('');
             dom.tasksBar.innerHTML = '<img src="' + conf.imgTaskArtifact + '"><span>' + this.tasksDone + ' / ' + this.totalTasks + '</span>';
         },
         
@@ -851,7 +884,11 @@
                 itemEl.style.backgroundImage = "url('" + conf.imgTaskArtifact + "')";
             }
             if (config.type === 'life') {
-                itemEl.innerHTML = '❤️';
+                if (conf.imgLife) {
+                    itemEl.innerHTML = '<img src="' + conf.imgLife + '">';
+                } else {
+                    itemEl.innerHTML = '❤️';
+                }
             }
             if (config.type === 'armor') {
                 itemEl.innerHTML = '🛡️';
@@ -981,16 +1018,22 @@
             dom.aEl.innerHTML = ''; 
             dom.userSeqDisplay.classList.add('hidden'); 
             
-            if(task.sentence) {
+            if(task.infoOnly) {
+                dom.qEl.innerHTML = task.q;
+                const b = document.createElement('button');
+                b.innerHTML = conf.closeButtonText || 'ЗАКРЫТЬ';
+                b.onclick = () => this.taskSuccess();
+                dom.aEl.appendChild(b);
+            }
+            else if(task.sentence) {
                 dom.qEl.textContent = 'Расставьте слова в правильном порядке';
                 dom.userSeqDisplay.classList.remove('hidden');
                 dom.userSeqDisplay.innerHTML = '';
                 
                 const c = task.sentence.split(' ').filter(Boolean);
                 const s = [...c].sort(() => 0.5 - Math.random());
-                let u = []; // Массив объектов { word: string, btn: HTMLButtonElement }
+                let u = []; 
                 
-                // Функция отрисовки выбранной цепочки слов
                 const renderChain = () => {
                     dom.userSeqDisplay.innerHTML = '';
                     u.forEach((item, index) => {
@@ -998,7 +1041,6 @@
                         tag.className = 'seq-word';
                         tag.innerHTML = item.word;
                         
-                        // Клик по слову в поле сборки возвращает его обратно
                         tag.onclick = () => {
                             item.btn.disabled = false;
                             item.btn.style.opacity = '1';
@@ -1018,7 +1060,6 @@
                         b.style.opacity = '0.3';
                         renderChain();
                         
-                        // Проверяем правильность только когда собраны абсолютно ВСЕ слова
                         if(u.length === c.length) {
                             const resultPhrase = u.map(item => item.word).join(' ');
                             if(resultPhrase === task.sentence) {
@@ -1039,7 +1080,8 @@
                     dom.aEl.appendChild(b);
                     return b;
                 });
-            } else if(task.c && task.w) {
+            } 
+            else if(task.c && task.w) {
                 dom.qEl.innerHTML = task.q;
                 [task.c, ...task.w].sort(() => 0.5 - Math.random()).forEach(o => {
                     const b = document.createElement('button');
@@ -1047,7 +1089,8 @@
                     b.onclick = () => (o === task.c) ? this.taskSuccess() : this.handleIncorrectAnswer();
                     dom.aEl.appendChild(b);
                 });
-            } else if(task.c) {
+            } 
+            else if(task.c) {
                 dom.qEl.innerHTML = task.q.replace(/_+/, '___');
                 
                 const wrap = document.createElement('div');
@@ -1105,18 +1148,24 @@
                 dom.boss.classList.remove('boss-win-shake'); 
                 dom.boss.style.opacity = '0'; 
                 this.createBossExplosion(); 
+                
                 setTimeout(() => {
-                    dom.hero.style.transition = '';
-                    dom.hero.style.left = conf.bossPosX + '%';
-                    requestAnimationFrame(() => {
-                        dom.hero.style.bottom = 'auto';
-                        dom.hero.style.transition = 'top 2s ease-in-out';
-                        dom.hero.style.top = conf.bossPosY + '%';
-                    });
-                    setTimeout(() => {
+                    if (conf.heroMovesToBoss) {
+                        dom.hero.style.transition = '';
+                        dom.hero.style.left = conf.bossPosX + '%';
+                        requestAnimationFrame(() => {
+                            dom.hero.style.bottom = 'auto';
+                            dom.hero.style.transition = 'top 2s ease-in-out';
+                            dom.hero.style.top = conf.bossPosY + '%';
+                        });
+                        setTimeout(() => {
+                            dom.hero.classList.add('glowing');
+                            dom.winTextPanel.classList.remove('hidden');
+                        }, 2000);
+                    } else {
                         dom.hero.classList.add('glowing');
                         dom.winTextPanel.classList.remove('hidden');
-                    }, 2000);
+                    }
                 }, 1200);
             }, 2000);
         },
@@ -1174,7 +1223,24 @@
             document.execCommand('copy');
             const btn = document.getElementById('copyBtn');
             btn.innerText = 'СКОПИРОВАНО!'; btn.style.background = '#2ecc71'; btn.style.color = '#fff';
-            setTimeout(() => { btn.innerText = 'СГЕНЕРИРОВАТЬ IFRAME-КОД'; btn.style.background = 'linear-gradient(135deg, #6b9e28, #8ECA3C)'; btn.style.color = '#1a1a2e'; }, 2000);
+            setTimeout(() => { btn.innerText = 'СКОПИРОВАТЬ IFRAME'; btn.style.background = 'linear-gradient(135deg, #6b9e28, #8ECA3C)'; btn.style.color = '#1a1a2e'; }, 2000);
+        }
+
+        function downloadHtml() {
+            const gameHtml = generateGameHtml();
+            const blob = new Blob([gameHtml], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'king_of_the_hill_game.html';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            
+            const btn = document.getElementById('dlBtn');
+            const origText = btn.innerText;
+            btn.innerText = 'ФАЙЛ СКАЧАН!';
+            setTimeout(() => { btn.innerText = origText; }, 2000);
         }
 
         let previewTimeout;
