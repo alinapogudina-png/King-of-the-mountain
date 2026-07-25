@@ -56,7 +56,7 @@
         <h1 id="editor-title">Царь горы</h1>
         <div class="subtitle">Alina Pogudina 2026 @ELT_workshop</div>
         
-        <h3>Начальный экран и Кнопка</h3>
+        <h3>Начальный экран и Кнопки</h3>
         <div class="flex-row">
             <div class="form-group flex-col" style="flex:2">
                 <label>Заголовок игры</label>
@@ -66,16 +66,46 @@
                 <label>Цвет заголовка</label>
                 <input type="color" id="titleColor" value="#ffffff">
             </div>
-            <div class="form-group flex-col">
-                <label>Язык UI</label>
-                <select id="uiLang">
-                    <option value="RU">Русский</option>
-                    <option value="EN">English</option>
-                    <option value="ES">Español</option>
-                    <option value="FR">Français</option>
-                    <option value="DE">Deutsch</option>
-                </select>
-            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Шрифт заголовка</label>
+            <select id="titleFontFamily">
+                <option value="'Russo One', sans-serif">Russo One</option>
+                <option value="'Montserrat', sans-serif">Montserrat</option>
+                <option value="'Comfortaa', sans-serif">Comfortaa</option>
+                <option value="'Jura', sans-serif">Jura</option>
+                <option value="'Caveat', cursive">Caveat</option>
+                <option value="'Neucha', cursive">Neucha</option>
+                <option value="'Oswald', sans-serif">Oswald</option>
+                <option value="'Lobster', cursive">Lobster</option>
+                <option value="'Pacifico', cursive">Pacifico</option>
+                <option value="'Bangers', cursive">Bangers</option>
+                <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                <option value="'Playfair Display', serif">Playfair Display</option>
+                <option value="'Amatic SC', cursive">Amatic SC</option>
+                <option value="'Rubik Bubbles', cursive">Rubik Bubbles</option>
+                <option value="'Alice', serif">Alice</option>
+                <option value="'Kurale', serif">Kurale</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Exo 2', sans-serif">Exo 2</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+            </select>
+        </div>
+
+        <div class="styled-box">
+             <div class="flex-row" style="margin: 0 0 10px 0; align-items: center; gap:10px;">
+                <input type="checkbox" id="hasSubtitle" style="width:20px; height:20px; cursor:pointer;" onchange="toggleSubtitleInput()">
+                <label style="margin:0; cursor:pointer;" for="hasSubtitle">Добавить подзаголовок</label>
+             </div>
+             <input type="text" id="gameSubtitle" value="Собери все кристаллы и победи босса!" style="display:none;">
+        </div>
+
+        <div class="styled-box">
+             <div class="flex-row" style="margin: 0; align-items: center; gap:10px;">
+                <input type="checkbox" id="skipStartScreen" style="width:20px; height:20px; cursor:pointer;">
+                <label style="margin:0; cursor:pointer;" for="skipStartScreen">Без приветственного экрана (сразу старт)</label>
+             </div>
         </div>
 
         <div class="flex-row">
@@ -118,6 +148,13 @@
 
         <h3>Размеры и позиционирование</h3>
         <div class="styled-box">
+             <div class="flex-row" style="margin: 0 0 10px 0; align-items: center; gap:10px;">
+                <input type="checkbox" id="flipHero" checked style="width:20px; height:20px; cursor:pointer;">
+                <label style="margin:0; cursor:pointer;" for="flipHero">Поворачивать персонажа в сторону движения</label>
+             </div>
+        </div>
+
+        <div class="styled-box">
              <label>Размер героя <span id="heroSizeVal" class="val-display">150px</span></label>
              <input type="range" id="heroSize" min="50" max="250" value="150" oninput="updateVal('heroSize', 'heroSizeVal', 'px')">
         </div>
@@ -125,6 +162,22 @@
              <label>Позиция героя (Y) <span id="heroPosYVal" class="val-display">5%</span></label>
              <input type="range" id="heroPosY" min="0" max="30" value="5" oninput="updateVal('heroPosY', 'heroPosYVal', '%')">
         </div>
+
+        <div class="styled-box">
+             <label>Размер кристалла <span id="taskSizeVal" class="val-display">50px</span></label>
+             <input type="range" id="taskSize" min="20" max="150" value="50" oninput="updateVal('taskSize', 'taskSizeVal', 'px')">
+        </div>
+
+        <div class="form-group">
+            <label>Анимация босса</label>
+            <select id="bossAnimation">
+                <option value="none">Без движения</option>
+                <option value="float" selected>Парение (плавные волны)</option>
+                <option value="shake">Тряска (раз в несколько секунд)</option>
+                <option value="pulse">Пульсация (дыхание)</option>
+            </select>
+        </div>
+
         <div class="styled-box">
              <label>Размер босса <span id="bossSizeVal" class="val-display">150px</span></label>
              <input type="range" id="bossSize" min="50" max="250" value="150" oninput="updateVal('bossSize', 'bossSizeVal', 'px')">
@@ -146,7 +199,7 @@
         </div>
         
         <div class="form-group">
-            <label>Шрифт текстов</label>
+            <label>Шрифт текстов заданий</label>
             <select id="fontFamily">
                 <option value="'Montserrat', sans-serif">Montserrat</option>
                 <option value="'Russo One', sans-serif">Russo One</option>
@@ -190,7 +243,7 @@
         </div>
 
         <div class="form-group" id="check-btn-text-group" style="display:none;">
-            <label>Текст на кнопке проверки (любой язык!)</label>
+            <label>Текст на кнопке проверки</label>
             <input type="text" id="checkButtonText" value="ПРОВЕРИТЬ">
         </div>
 
@@ -241,8 +294,8 @@
             <input type="file" id="file-life" accept="image/*">
         </div>
         <div class="styled-box">
-            <label>Фон игры</label>
-            <input type="text" id="imgBackground" value="https://i.postimg.cc/9096CnzR/e0185c15b34d67ff88cc7d9ff7ac5955-74146936-9128-4b7d-b69c-bcfdb5a1a607-(7).png">
+            <label>Фон игры (Оставьте пустым для прозрачного фона)</label>
+            <input type="text" id="imgBackground" value="https://i.postimg.cc/9096CnzR/e0185c15b34d67ff88cc7d9ff7ac5955-74146936-9128-4b7d-b69c-bcfdb5a1a607-(7).png" placeholder="Пусто = Прозрачный фон">
             <input type="file" id="file-bg" accept="image/*">
         </div>
         <div class="styled-box">
@@ -267,7 +320,6 @@
         </div>
 
         <h3>Финальные экраны</h3>
-        <!-- ГАЛОЧКА: ПЕРЕМЕЩЕНИЕ ГЕРОЯ В КОНЦЕ ИГРЫ -->
         <div class="styled-box">
              <div class="flex-row" style="margin: 0; align-items: center; gap:10px;">
                 <input type="checkbox" id="heroMovesToBoss" checked style="width:20px; height:20px; cursor:pointer;">
@@ -302,6 +354,11 @@
         const allInputs = document.querySelectorAll('.editor-panel input, .editor-panel select, .editor-panel textarea');
         let previewWindow = null;
 
+        function toggleSubtitleInput() {
+            const hasSub = document.getElementById('hasSubtitle').checked;
+            document.getElementById('gameSubtitle').style.display = hasSub ? 'block' : 'none';
+        }
+
         function handleFileUpload(event, targetInputId) {
             const file = event.target.files[0];
             if (!file) return;
@@ -330,6 +387,7 @@
             updateVal('taskFrequency', 'taskFreqVal', ' сек');
             updateVal('heroSize', 'heroSizeVal', 'px');
             updateVal('heroPosY', 'heroPosYVal', '%');
+            updateVal('taskSize', 'taskSizeVal', 'px');
             updateVal('bossSize', 'bossSizeVal', 'px');
             updateVal('bossPosX', 'bossPosXVal', '%');
             updateVal('bossPosY', 'bossPosYVal', '%');
@@ -342,6 +400,7 @@
                 }
             });
 
+            toggleSubtitleInput();
             toggleTaskInputs();
             debounceGenerate();
         });
@@ -388,7 +447,10 @@
             return {
                 title: document.getElementById('gameTitle').value,
                 titleColor: document.getElementById('titleColor').value,
-                lang: document.getElementById('uiLang').value,
+                titleFontFamily: document.getElementById('titleFontFamily').value,
+                hasSubtitle: document.getElementById('hasSubtitle').checked,
+                subtitle: document.getElementById('gameSubtitle').value,
+                skipStartScreen: document.getElementById('skipStartScreen').checked,
                 startButtonText: document.getElementById('startButtonText').value,
                 startButtonColor: document.getElementById('startButtonColor').value,
                 startButtonTextColor: document.getElementById('startButtonTextColor').value,
@@ -409,7 +471,10 @@
                 taskFrequency: document.getElementById('taskFrequency').value,
                 mode: mode,
                 tasks: tasks,
+                flipHero: document.getElementById('flipHero').checked,
                 heroSize: document.getElementById('heroSize').value,
+                taskSize: document.getElementById('taskSize').value,
+                bossAnimation: document.getElementById('bossAnimation').value,
                 bossSize: document.getElementById('bossSize').value,
                 heroPosY: document.getElementById('heroPosY').value,
                 bossPosY: document.getElementById('bossPosY').value,
@@ -441,8 +506,13 @@
             let qBoxRgba = hexToRgb(conf.colorQBox);
             let aBoxRgba = hexToRgb(conf.colorABox);
 
+            const bgCss = conf.imgBackground && conf.imgBackground.trim() !== '' 
+                ? `background: url('${conf.imgBackground}') center/cover no-repeat;` 
+                : `background: transparent;`;
+            const bodyBg = conf.imgBackground && conf.imgBackground.trim() !== '' ? '#000' : 'transparent';
+
             return `<!DOCTYPE html>
-<html lang="${conf.lang.toLowerCase()}">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -455,6 +525,7 @@
     
     :root { 
         --font-family: ${conf.fontFamily}, sans-serif; 
+        --title-font-family: ${conf.titleFontFamily}, sans-serif;
         --font-size: ${conf.fontSize}px; 
         --font-color: ${conf.fontColor}; 
         --border-color: ${conf.borderColor}; 
@@ -462,12 +533,12 @@
         --boss-left: ${conf.bossPosX}%; 
         --hero-size: ${conf.heroSize}px;
     }
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #game-app { position: relative; width: 100%; height: 100%; background: url('${conf.imgBackground}') center/cover no-repeat; user-select: none; cursor: none; box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: ${bodyBg}; }
+    #game-app { position: relative; width: 100%; height: 100%; ${bgCss} user-select: none; cursor: none; box-sizing: border-box; }
     #game-app * { box-sizing: border-box; }
     .hidden { display: none !important; }
     
-    #hero { position: absolute; bottom: ${conf.heroPosY}%; left: 50%; width: var(--hero-size); height: var(--hero-size); background: url('${conf.imgHero}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.5)); transition: opacity 0.2s, transform 0.2s; z-index: 10;}
+    #hero { position: absolute; bottom: ${conf.heroPosY}%; left: 50%; width: var(--hero-size); height: var(--hero-size); background: url('${conf.imgHero}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.5)); transition: opacity 0.2s, transform 0.1s linear; z-index: 10;}
     
     /* ЭНЕРГЕТИЧЕСКАЯ БРОНЯ */
     #hero::before {
@@ -496,8 +567,16 @@
     #hero.glowing { animation: goldGlow 2s infinite alternate; }
     @keyframes goldGlow { from { filter: drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 15px #ffb800); } to { filter: drop-shadow(0 0 15px #fff) drop-shadow(0 0 25px #ffd700); } }
     
-    #boss { position: absolute; top: var(--boss-top); left: var(--boss-left); width: ${conf.bossSize}px; height: ${conf.bossSize}px; background: url('${conf.imgBoss}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.7)); transition: opacity 0.5s, filter 0.5s, transform 0.2s; z-index: 9; }
-    #boss.frozen { filter: hue-rotate(180deg) brightness(1.2) saturate(2) drop-shadow(0 0 15px #00aaff); }
+    #boss { position: absolute; top: var(--boss-top); left: var(--boss-left); width: ${conf.bossSize}px; height: ${conf.bossSize}px; background: url('${conf.imgBoss}') center/contain no-repeat; transform: translateX(-50%); filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.7)); transition: opacity 0.5s, filter 0.5s; z-index: 9; }
+    #boss.frozen { filter: hue-rotate(180deg) brightness(1.2) saturate(2) drop-shadow(0 0 15px #00aaff) !important; }
+    
+    /* АНИМАЦИИ БОССА */
+    .boss-anim-float { animation: bossFloat 3s infinite ease-in-out; }
+    .boss-anim-pulse { animation: bossPulse 2s infinite ease-in-out; }
+    
+    @keyframes bossFloat { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-15px); } }
+    @keyframes bossPulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.08); } }
+
     @keyframes shake-anim { 0%, 100% { transform: translate(-50%, 0) rotate(0); } 25% { transform: translate(-51%, 1px) rotate(-1deg); } 75% { transform: translate(-49%, -1px) rotate(1deg); } }
     .boss-periodic-shake { animation: shake-anim 0.4s 2; }
     .boss-win-shake { animation: shake-anim 0.2s 10 !important; }
@@ -507,17 +586,15 @@
     
     .projectile { position: absolute; width: ${conf.projectileSize}px; height: ${conf.projectileSize}px; background: url('${conf.imgProjectile}') center/contain no-repeat; z-index: 5; transform: translate(-50%, -50%); }
     
-    /* ДИНАМИЧЕСКИЕ ПРЕДМЕТЫ НА ЗЕМЛЕ И В ВОЗДУХЕ */
     .collectible { 
         position: absolute; 
-        width: 50px; 
-        height: 50px; 
         z-index: 20; 
         transform: translateX(-50%); 
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
     }
+    .task-item { width: ${conf.taskSize}px; height: ${conf.taskSize}px; }
     .fall-item { animation: itemFloat 3s ease-in-out infinite; }
     
     @keyframes groundItemPulse {
@@ -525,12 +602,10 @@
         100% { transform: translateX(-50%) scale(1.1); }
     }
     
-    /* СТИЛИ КРИСТАЛЛА */
     .task-item { animation-name: itemFloat, taskGlow; animation-duration: 3s, 2s; animation-iteration-count: infinite, infinite; }
     @keyframes itemFloat { 0%, 100% { transform: translateY(0) translateX(-50%); } 50% { transform: translateY(-8px) translateX(-50%); } }
     @keyframes taskGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 255, 180, 0.7)); } 50% { filter: drop-shadow(0 0 15px rgba(255, 255, 180, 1)); } }
     
-    /* СФЕРА ЖИЗНИ */
     .life-sphere {
         position: absolute;
         width: 45px;
@@ -552,7 +627,6 @@
     }
     .life-sphere img { width: 75%; height: 75%; object-fit: contain; }
     
-    /* РУНА БРОНИ (ЩИТ) */
     .armor-pickup {
         position: absolute;
         width: 45px;
@@ -580,8 +654,9 @@
     #tasks-bar img { width: 24px; height: 24px; }
     #tasks-bar span { color: white; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: bold; }
     
-    .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; cursor: auto; padding: 20px; text-align: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
-    .screen h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-family: 'Russo One', sans-serif; text-transform: uppercase; margin: 0 0 30px 0; color: ${conf.titleColor}; }
+    .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; cursor: auto; padding: 20px; text-align: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); }
+    .screen h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-family: var(--title-font-family); text-transform: uppercase; margin: 0 0 10px 0; color: ${conf.titleColor}; }
+    .game-subtitle { font-size: clamp(1rem, 2vw, 1.4rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: #a0a0c0; max-width: 600px; line-height: 1.4; }
     .screen img { max-width: clamp(150px, 30vh, 250px); max-height: 30vh; object-fit: contain; margin-bottom: 20px; }
     .screen p { font-size: clamp(1rem, 2.5vw, 1.5rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: white;}
     
@@ -640,7 +715,11 @@
 <div id="game-app" tabindex="0">
     <div id="ui-layer"><div id="lives-bar"></div><div id="tasks-bar"></div></div>
     <div id="boss"></div><div id="hero"></div>
-    <div id="start-screen" class="screen"><h1>${conf.title}</h1><button id="start-btn">${conf.startButtonText}</button></div>
+    <div id="start-screen" class="screen">
+        <h1>${conf.title}</h1>
+        ${conf.hasSubtitle && conf.subtitle ? `<div class="game-subtitle">${conf.subtitle}</div>` : ''}
+        <button id="start-btn">${conf.startButtonText}</button>
+    </div>
     <div id="task-board" class="task-panel hidden">
         <p id="task-question"></p>
         <div id="user-sequence-display" class="hidden"></div>
@@ -674,6 +753,8 @@
         tasksDone: 0, 
         totalTasks: conf.tasks.length, 
         heroX: 50, 
+        lastHeroX: 50,
+        isFlipped: false,
         heroVX: 0, 
         items: [], 
         spawners: [], 
@@ -689,6 +770,10 @@
             dom.loseScreen.querySelector('button').onclick = () => location.reload();
             dom.startScreen.querySelector('button').onclick = () => { dom.startScreen.classList.add('hidden'); this.start(); };
             
+            if (conf.bossAnimation && conf.bossAnimation !== 'none' && conf.bossAnimation !== 'shake') {
+                dom.boss.classList.add('boss-anim-' + conf.bossAnimation);
+            }
+
             dom.app.addEventListener('pointermove', e => { 
                 if (!this.isPlaying) return; 
                 const rect = dom.app.getBoundingClientRect(); 
@@ -704,7 +789,13 @@
             window.addEventListener('keyup', e => { 
                 if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') this.heroVX = 0; 
             });
+            
             this.updateUI();
+
+            if (conf.skipStartScreen) {
+                dom.startScreen.classList.add('hidden');
+                this.start();
+            }
         },
         
         start() { 
@@ -748,8 +839,10 @@
             if (!this.isPlaying || this.isBossFrozen) return;
             const delay = Math.random() * 3000 + 3000;
             this.bossAnimTimeout = setTimeout(() => {
-                dom.boss.classList.add('boss-periodic-shake');
-                setTimeout(() => dom.boss.classList.remove('boss-periodic-shake'), 800);
+                if (conf.bossAnimation === 'shake') {
+                    dom.boss.classList.add('boss-periodic-shake');
+                    setTimeout(() => dom.boss.classList.remove('boss-periodic-shake'), 800);
+                }
                 this.animateBoss();
             }, delay);
         },
@@ -773,7 +866,17 @@
         gameLoop() {
             if (!this.isPlaying) return;
             this.heroX = Math.max(0, Math.min(100, this.heroX + this.heroVX));
+            
+            if (conf.flipHero) {
+                const dx = this.heroX - this.lastHeroX;
+                if (dx < -0.1) this.isFlipped = true;
+                else if (dx > 0.1) this.isFlipped = false;
+                this.lastHeroX = this.heroX;
+            }
+            
             dom.hero.style.left = this.heroX + '%';
+            dom.hero.style.transform = 'translateX(-50%)' + (this.isFlipped ? ' scaleX(-1)' : ' scaleX(1)');
+
             const heroRect = dom.hero.getBoundingClientRect();
             const appRect = dom.app.getBoundingClientRect();
             
