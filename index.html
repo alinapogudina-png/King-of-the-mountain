@@ -233,7 +233,7 @@
              <div class="flex-row" style="align-items: flex-start; margin: 0;">
                 <div class="form-group flex-col" style="margin:0;"><label>Вопрос (Размер px)</label><input type="number" id="qFontSize" value="24"></div>
                 <div class="form-group flex-col" style="margin:0;"><label>Вопрос (Цвет)</label><input type="color" id="qColor" value="#ffffff"></div>
-                <div class="form-group flex-col" style="margin:0; border-left: 1px solid #4b4b6a; padding-left:15px;"><label>Ответы (Размер px)</label><input type="number" id="aFontSize" value="20"></div>
+                <div class="form-group flex-col" style="margin:0; border-left: 1px solid #4b4b6a; padding-left:15px;"><label>Ответы (Размер px)</label><input type="number" id="aFontSize" value="18"></div>
                 <div class="form-group flex-col" style="margin:0;"><label>Ответы (Цвет)</label><input type="color" id="aColor" value="#ffffff"></div>
             </div>
         </div>
@@ -264,11 +264,11 @@
             <div class="flex-row" style="align-items: flex-start;">
                 <div class="form-group flex-col">
                     <label>ВОПРОСЫ (Каждый на новой строке)</label>
-                    <textarea id="qList">Столица Франции?&#10;Запомни: Земля вращается вокруг Солнца!&#10;Какое животное самое быстрое?</textarea>
+                    <textarea id="qList">Что такое обращение?&#10;Запомни: Земля вращается вокруг Солнца!&#10;Какое животное самое быстрое?</textarea>
                 </div>
                 <div class="form-group flex-col" style="flex: 1.5;">
                     <label>ВАРИАНТЫ (Правильный | Неправильный...)</label>
-                    <textarea id="aList">Париж | Рим | Берлин&#10;&#10;Гепард | Лев | Сапсан</textarea>
+                    <textarea id="aList">Слово или словосочетание, называющее того, к кому обращаются с речью | Второстепенный член предложения | Слово, обозначающее действие | Главный член предложения&#10;&#10;Гепард | Лев | Сапсан</textarea>
                 </div>
             </div>
         </div>
@@ -676,15 +676,18 @@
     .screen button:hover { transform: scale(1.1); }
     #start-btn { background-color: ${conf.startButtonColor}; }
     
-    .task-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 600px; background: ${qBoxRgba}; padding: 40px; border-radius: 20px; border: 3px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px var(--border-color); font-family: var(--font-family); color: var(--font-color); z-index: 100; cursor: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    /* ИСПРАВЛЕННОЕ ОКНО ЗАДАНИЙ */
+    .task-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; background: ${qBoxRgba}; padding: 35px 30px; border-radius: 20px; border: 3px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px var(--border-color); font-family: var(--font-family); color: var(--font-color); z-index: 100; cursor: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
     .task-panel.incorrect-flash { animation: flash-red 0.6s; }
     @keyframes flash-red { 0%, 100% { border-color: var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); } 50% { border-color: #e74c3c; box-shadow: 0 0 25px 3px rgba(231, 76, 60, 0.7); } }
     
-    #task-question { font-size: ${conf.qFontSize}px; color: ${conf.qColor}; margin: 0; line-height: 1.4; text-align: center; }
-    #task-answers { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; }
+    #task-question { font-size: ${conf.qFontSize}px; color: ${conf.qColor}; margin: 0; line-height: 1.4; text-align: center; width: 100%; word-break: break-word; }
     
-    #task-answers button { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family); font-size: ${conf.aFontSize}px; color: ${conf.aColor}; padding: 12px 24px; border: 2px solid var(--border-color); background: ${aBoxRgba}; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-    #task-answers button:hover { background: #8ECA3C; color: #1a1a2e; border-color: #8ECA3C; transform: scale(1.05); }
+    /* СЕТКА ОТВЕТОВ В 2 КОЛОНКИ С АВТОПЕРЕНОСОМ */
+    #task-answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; width: 100%; justify-content: center; }
+    
+    #task-answers button { width: 100%; min-height: 55px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family); font-size: ${conf.aFontSize}px; color: ${conf.aColor}; padding: 12px 18px; border: 2px solid var(--border-color); background: ${aBoxRgba}; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; white-space: normal; word-break: break-word; line-height: 1.3; }
+    #task-answers button:hover { background: #8ECA3C; color: #1a1a2e; border-color: #8ECA3C; transform: scale(1.02); }
     #task-answers button:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .input-fill { width: 100%; max-width: 350px; padding: 12px; font-family: var(--font-family); font-size: ${conf.aFontSize}px; text-align: center; border-radius: 8px; border: 2px solid var(--border-color); background: #333; color: #fff; outline: none;}
@@ -1136,6 +1139,9 @@
             if(task.infoOnly) {
                 dom.qEl.innerHTML = task.q;
                 const b = document.createElement('button');
+                b.style.gridColumn = "1 / -1";
+                b.style.maxWidth = "300px";
+                b.style.justifySelf = "center";
                 b.innerHTML = conf.closeButtonText || 'ЗАКРЫТЬ';
                 b.onclick = () => this.taskSuccess();
                 dom.aEl.appendChild(b);
@@ -1209,7 +1215,7 @@
                 dom.qEl.innerHTML = task.q.replace(/_+/, '___');
                 
                 const wrap = document.createElement('div');
-                wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:15px;width:100%;';
+                wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:15px;width:100%;grid-column:1/-1;';
                 
                 const i = document.createElement('input');
                 i.className = 'input-fill';
