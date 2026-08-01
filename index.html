@@ -325,6 +325,10 @@
             <input type="text" id="imgLose" value="https://i.postimg.cc/bJG47dxC/pngwing-com-(9).png">
             <input type="file" id="file-lose" accept="image/*">
         </div>
+        <div class="styled-box">
+             <label>Размер картинки поражения <span id="loseImgSizeVal" class="val-display">200px</span></label>
+             <input type="range" id="loseImgSize" min="100" max="400" value="200" oninput="updateVal('loseImgSize', 'loseImgSizeVal', 'px')">
+        </div>
         <div class="form-group flex-col"><label>Текст поражения</label><input type="text" id="loseText" value="Гора оказалась тебе не по зубам..."></div>
         <div class="form-group flex-col"><label>Кнопка "Заново"</label><input type="text" id="restartButtonText" value="ИГРАТЬ ЗАНОВО"></div>
         <div class="form-group flex-col"><label>Кнопка закрытия инфо-карточки</label><input type="text" id="closeButtonText" value="ЗАКРЫТЬ"></div>
@@ -389,6 +393,7 @@
             updateVal('bossSize', 'bossSizeVal', 'px');
             updateVal('bossPosX', 'bossPosXVal', '%');
             updateVal('bossPosY', 'bossPosYVal', '%');
+            updateVal('loseImgSize', 'loseImgSizeVal', 'px');
             
             allInputs.forEach(el => {
                 const eventType = (el.type === 'range' || el.type === 'checkbox') ? 'change' : 'input';
@@ -476,6 +481,7 @@
                 winBoxColor: document.getElementById('winBoxColor').value,
                 winNeonColor: document.getElementById('winNeonColor').value,
                 imgLose: document.getElementById('imgLose').value,
+                loseImgSize: document.getElementById('loseImgSize').value || '200',
                 loseText: document.getElementById('loseText').value,
                 restartButtonText: document.getElementById('restartButtonText').value,
                 checkButtonText: document.getElementById('checkButtonText').value,
@@ -646,11 +652,26 @@
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; cursor: auto; padding: 20px; text-align: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); }
     .screen h1 { font-size: clamp(1.5rem, 5vw, ${conf.titleFontSize}px); font-family: var(--title-font-family); text-transform: uppercase; margin: 0 0 10px 0; color: ${conf.titleColor}; }
     .game-subtitle { font-size: clamp(1rem, 2vw, 1.4rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: #a0a0c0; max-width: 600px; line-height: 1.4; }
-    .screen img { max-width: clamp(150px, 30vh, 250px); max-height: 30vh; object-fit: contain; margin-bottom: 20px; }
+    .screen img { width: ${conf.loseImgSize}px; max-width: 90vw; max-height: 35vh; object-fit: contain; margin-bottom: 20px; }
     .screen p { font-size: clamp(1rem, 2.5vw, 1.5rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: white;}
     
-    .screen button { font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: clamp(1.1rem, 2.5vw, 1.4rem); padding: 18px 50px; border-radius: 50px; border: 3px solid white; color: ${conf.startButtonTextColor}; cursor: pointer; transition: transform 0.2s; letter-spacing: 1px; }
-    .screen button:hover { transform: scale(1.1); }
+    /* СТИЛИ КНОПКИ СТАРТА И ПОВТОРА (ЕРИНЫЙ ДИЗАЙН) */
+    .screen button, .styled-restart-btn { 
+        font-family: var(--title-font-family) !important; 
+        font-weight: bold !important; 
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem) !important; 
+        padding: 18px 50px !important; 
+        border-radius: 50px !important; 
+        border: 3px solid white !important; 
+        color: ${conf.startButtonTextColor} !important; 
+        background-color: ${conf.startButtonColor} !important; 
+        cursor: pointer !important; 
+        transition: transform 0.2s, box-shadow 0.2s !important; 
+        letter-spacing: 1px !important; 
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4) !important;
+        text-transform: uppercase !important;
+    }
+    .screen button:hover, .styled-restart-btn:hover { transform: scale(1.08) !important; box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important; }
     #start-btn { background-color: ${conf.startButtonColor}; }
     
     /* ОКНО ЗАДАНИЙ С АВТОШИРИНОЙ */
@@ -696,9 +717,7 @@
     
     /* КАСТОМИЗИРУЕМАЯ ПЛАШКА ПОБЕДЫ */
     .win-text-frame { position: absolute; z-index: 100; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 40px); max-width: 700px; background: ${winBoxRgba}; backdrop-filter: blur(3px); color: ${conf.winTextColor}; padding: 40px; border-radius: 20px; border: 2px solid ${conf.winNeonColor}; box-shadow: 0 0 30px ${conf.winNeonColor}; text-align: center; }
-    .win-text-frame p { font-family: 'Russo One', sans-serif; font-size: clamp(1.2rem, 3vw, 2rem); margin: 0 0 30px; text-transform: uppercase; color: ${conf.winTextColor}; }
-    .win-text-frame button { font-family: 'Montserrat', sans-serif; font-weight: bold; font-size: 1rem; padding: 10px 30px; border-radius: 25px; border: 2px solid ${conf.winTextColor}; background: transparent; color: ${conf.winTextColor}; cursor: pointer; transition: all 0.2s; }
-    .win-text-frame button:hover { background: ${conf.winNeonColor}; color: #14141e; border-color: ${conf.winNeonColor}; }
+    .win-text-frame p { font-family: var(--title-font-family); font-size: clamp(1.2rem, 3vw, 2rem); margin: 0 0 30px; text-transform: uppercase; color: ${conf.winTextColor}; }
     
     .floating-text { position: absolute; font-family: 'Russo One', sans-serif; font-size: 20px; text-shadow: 1px 1px 2px black; pointer-events: none; animation: floatUp 1.5s ease-out forwards; z-index: 100; }
     @keyframes floatUp { to { transform: translate(-50%, -50px); opacity: 0; } }
@@ -718,8 +737,8 @@
         <div id="user-sequence-display" class="hidden"></div>
         <div id="task-answers"></div>
     </div>
-    <div id="win-text-panel" class="win-text-frame hidden"><p>${conf.winText}</p><button>${conf.restartButtonText}</button></div>
-    <div id="lose-screen" class="screen hidden"><img src="${conf.imgLose}"><p>${conf.loseText}</p><button>${conf.restartButtonText}</button></div>
+    <div id="win-text-panel" class="win-text-frame hidden"><p>${conf.winText}</p><button class="styled-restart-btn">${conf.restartButtonText}</button></div>
+    <div id="lose-screen" class="screen hidden"><img src="${conf.imgLose}"><p>${conf.loseText}</p><button class="styled-restart-btn">${conf.restartButtonText}</button></div>
 </div>
 <script>
     const conf = ${JSON.stringify(conf)};
@@ -1354,7 +1373,7 @@
                 'aColor', 'checkButtonText', 'qList', 'aList', 'imgLife', 'imgBackground',
                 'imgHero', 'imgBoss', 'imgProjectile', 'imgTaskArtifact',
                 'heroMovesToBoss', 'winText', 'winTextColor', 'winBoxColor', 'winNeonColor',
-                'imgLose', 'loseText', 'restartButtonText', 'closeButtonText'
+                'imgLose', 'loseImgSize', 'loseText', 'restartButtonText', 'closeButtonText'
             ];
             const state = {};
             ids.forEach(id => {
@@ -1404,6 +1423,7 @@
                     updateVal('bossSize', 'bossSizeVal', 'px');
                     updateVal('bossPosX', 'bossPosXVal', '%');
                     updateVal('bossPosY', 'bossPosYVal', '%');
+                    updateVal('loseImgSize', 'loseImgSizeVal', 'px');
 
                     debounceGenerate();
                 } catch (err) {
