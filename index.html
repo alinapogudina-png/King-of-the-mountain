@@ -17,7 +17,7 @@
         .editor-panel::-webkit-scrollbar-thumb { background: #8ECA3C; border-radius: 4px; }
         
         h1 { color: #8ECA3C; font-weight: 800; font-size: 28px; margin: 0 0 5px 0; text-align: center; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 2px 10px rgba(142, 202, 60, 0.4);}
-        .subtitle { text-align: center; color: #a0a0c0; font-size: 12px; margin-bottom: 20px; letter-spacing: 0.5px;}
+        .subtitle { text-align: center; color: #ffffff; font-size: 12px; margin-bottom: 20px; letter-spacing: 0.5px;}
         h3 { color: #fff; font-size: 15px; margin-bottom: 12px; border-bottom: 1px solid #4b4b6a; padding-bottom: 5px; margin-top: 25px; text-transform: uppercase; letter-spacing: 1px;}
         
         .form-group { margin-bottom: 15px; }
@@ -104,7 +104,14 @@
                 <input type="checkbox" id="hasSubtitle" style="width:20px; height:20px; cursor:pointer;" onchange="toggleSubtitleInput()">
                 <label style="margin:0; cursor:pointer;" for="hasSubtitle">Добавить подзаголовок</label>
              </div>
-             <input type="text" id="gameSubtitle" value="Собери все кристаллы и победи босса!" style="display:none;">
+             
+             <div id="subtitle-settings-group" style="display:none; flex-direction:column; gap:10px;">
+                 <input type="text" id="gameSubtitle" value="Собери все кристаллы и победи босса!">
+                 <div class="form-group" style="margin:0;">
+                     <label>Размер подзаголовка (px)</label>
+                     <input type="number" id="subtitleFontSize" value="24" min="10" max="60">
+                 </div>
+             </div>
         </div>
 
         <div class="styled-box">
@@ -190,7 +197,7 @@
 
         <div class="styled-box">
              <label>Размер босса <span id="bossSizeVal" class="val-display">150px</span></label>
-             <input type="range" id="bossSize" min="50" max="250" value="150" oninput="updateVal('bossSize', 'bossSizeVal', 'px')">
+             <input type="range" id="bossSize" min="50" max="500" value="150" oninput="updateVal('bossSize', 'bossSizeVal', 'px')">
         </div>
         <div class="styled-box">
              <label>Позиция босса (X) <span id="bossPosXVal" class="val-display">50%</span></label>
@@ -271,6 +278,9 @@
         </div>
 
         <h3>Графика (Загрузка или ссылки)</h3>
+        <div class="form-group">
+            <span class="help-text"><b>Внимание:</b> Размер загружаемых картинок (кроме фона) ограничен 2 МБ. Для фона ограничение отсутствует.</span>
+        </div>
         <div class="styled-box">
             <label>Иконка жизней (Необязательно)</label>
             <input type="text" id="imgLife" value="" placeholder="По умолчанию emoji ❤️">
@@ -357,12 +367,21 @@
 
         function toggleSubtitleInput() {
             const hasSub = document.getElementById('hasSubtitle').checked;
-            document.getElementById('gameSubtitle').style.display = hasSub ? 'block' : 'none';
+            document.getElementById('subtitle-settings-group').style.display = hasSub ? 'flex' : 'none';
         }
 
         function handleFileUpload(event, targetInputId) {
             const file = event.target.files[0];
             if (!file) return;
+
+            // Ограничение размера 2МБ для всех изображений, кроме фона (imgBackground)
+            const isBackground = targetInputId === 'imgBackground';
+            if (!isBackground && file.size > 2 * 1024 * 1024) {
+                alert('Размер файла превышает 2 МБ! Пожалуйста, выберите картинку поменьше (ограничение не действует на фон).');
+                event.target.value = '';
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 document.getElementById(targetInputId).value = e.target.result;
@@ -440,6 +459,7 @@
                 titleFontSize: document.getElementById('titleFontSize').value || '48',
                 hasSubtitle: document.getElementById('hasSubtitle').checked,
                 subtitle: document.getElementById('gameSubtitle').value,
+                subtitleFontSize: document.getElementById('subtitleFontSize').value || '24',
                 skipStartScreen: document.getElementById('skipStartScreen').checked,
                 startButtonText: document.getElementById('startButtonText').value,
                 startButtonColor: document.getElementById('startButtonColor').value,
@@ -651,7 +671,7 @@
     
     .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; cursor: auto; padding: 20px; text-align: center; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); }
     .screen h1 { font-size: clamp(1.5rem, 5vw, ${conf.titleFontSize}px); font-family: var(--title-font-family); text-transform: uppercase; margin: 0 0 10px 0; color: ${conf.titleColor}; }
-    .game-subtitle { font-size: clamp(1rem, 2vw, 1.4rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: #a0a0c0; max-width: 600px; line-height: 1.4; }
+    .game-subtitle { font-size: clamp(1rem, 2.5vw, ${conf.subtitleFontSize}px); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: #ffffff; max-width: 800px; line-height: 1.4; }
     .screen img { width: ${conf.loseImgSize}px; max-width: 90vw; max-height: 35vh; object-fit: contain; margin-bottom: 20px; }
     .screen p { font-size: clamp(1rem, 2.5vw, 1.5rem); font-family: 'Montserrat', sans-serif; margin: 0 0 30px 0; color: white;}
     
@@ -1364,7 +1384,7 @@
         function saveProject() {
             const ids = [
                 'gameTitle', 'titleColor', 'titleFontFamily', 'titleFontSize',
-                'hasSubtitle', 'gameSubtitle', 'skipStartScreen', 'startButtonText',
+                'hasSubtitle', 'gameSubtitle', 'subtitleFontSize', 'skipStartScreen', 'startButtonText',
                 'startButtonColor', 'startButtonTextColor', 'initialLives',
                 'projectileSpeed', 'projectileFrequency', 'projectileSize', 'taskFrequency',
                 'bonusFrequency', 'flipHero', 'heroSize', 'heroPosY', 'taskSize', 'bossAnimation',
